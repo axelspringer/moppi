@@ -1,0 +1,8 @@
+{
+  "generator-go-lang": {
+    "promptValues": {
+      "app": "kombinat api",
+      "repoUrl": "github.com/me/myapp"
+    }
+  }
+}
