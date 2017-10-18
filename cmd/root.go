@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/axelspringer/kombinat-api/version"
+	"github.com/axelspringer/moppi/version"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -31,7 +31,7 @@ var (
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:   "kombinat-api",
+	Use:   "moppi",
 	Short: "",
 	// TODO: should be added later
 	Long: ``,

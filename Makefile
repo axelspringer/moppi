@@ -24,11 +24,11 @@ build:
 	@echo "Compiling..."
 	@mkdir -p ./bin
 	@gox -output "bin/{{.Dir}}_${VERSION}_{{.OS}}_{{.Arch}}" -os="linux" -os="darwin" -arch="386" -arch="amd64" ./
-	@go build -i -o ./bin/kombinat-api
+	@go build -i -o ./bin/moppi
 	@echo "All done! The binaries is in ./bin let's have fun!"
 
 build/docker: build
-	@docker build -t kombinat-api:latest .
+	@docker build -t moppi:latest .
 
 vet: ## run go vet
 	@test -z "$$(go vet ${PACKAGES} 2>&1 | grep -v '*composite literal uses unkeyed fields|exit status 0)' | tee /dev/stderr)"

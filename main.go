@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/axelspringer/kombinat-api/cmd"
+import "github.com/axelspringer/moppi/cmd"
 
 func main() {
 	cmd.Execute()
