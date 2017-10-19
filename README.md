@@ -6,6 +6,14 @@
 
 A golang app created with `yo golang`.
 
+## Examples
+
+Make an install request with the `example/data.json`.
+
+```json
+curl -d "@install.json" -X POST http://localhost:8080/install
+```
+
 ## Getting Started
 
 Install neat tools and dependencies.

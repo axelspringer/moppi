@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/Sirupsen/logrus"
+  packages = ["."]
+  revision = "f006c2ac4710855cf0f916dd6b77acf6b048dc6e"
+  version = "v1.0.3"
+
+[[projects]]
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   revision = "629574ca2a5df945712d3079857300b5e4da0236"
@@ -80,9 +86,21 @@
   version = "v1.0.0"
 
 [[projects]]
+  name = "github.com/zenazn/goji"
+  packages = [".","bind","graceful","graceful/listener","web","web/middleware","web/mutil"]
+  revision = "64eb34159fe53473206c2b3e70fe396a639452f2"
+  version = "v1.0"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/crypto"
+  packages = ["ssh/terminal"]
+  revision = "ed5229da99e3a6df35c756cd64b6982d19505d86"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/sys"
-  packages = ["unix"]
+  packages = ["unix","windows"]
   revision = "8dbc5d05d6edcc104950cc299a1ce6641235bc86"
 
 [[projects]]
@@ -100,6 +118,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "45a9feecbdc089517fd439615b0b483e1ddb06749dd174cd429f092f9080f102"
+  inputs-digest = "c1cd27fc7f8e95181246bce46a0736e490f99baa2da8ce41f0d646790c03dd2e"
   solver-name = "gps-cdcl"
   solver-version = 1

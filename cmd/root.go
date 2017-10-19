@@ -18,6 +18,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spf13/pflag"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/axelspringer/moppi/server"
 	"github.com/axelspringer/moppi/version"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -64,7 +68,12 @@ func init() {
 	// Enables verbose output
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 
-	// Adding all other commands
+	// Some more specific flags
+	RootCmd.PersistentFlags().String("marathon", "", "Marathon Endpoint")
+	RootCmd.PersistentFlags().String("mesos", "", "Mesos Endpoint")
+	RootCmd.PersistentFlags().String("zookeeper", "", "List of Zookeepers")
+
+	// Add all commands
 	addCommands(RootCmd)
 }
 
@@ -77,6 +86,13 @@ func addCommands(cmd *cobra.Command) {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	var err error
+
+	for _, flags := range []*pflag.FlagSet{RootCmd.PersistentFlags()} {
+		err = viper.BindPFlags(flags)
+		if err != nil {
+			log.WithField("error", err).Fatal("could not bind flags")
+		}
+	}
 
 	if cfgFile != "" {
 		// Use config file from the flag.
@@ -105,4 +121,9 @@ func initConfig() {
 }
 
 func run(cmd *cobra.Command, args []string) {
+	u := &server.Universe{}
+	us := []*server.Universe{u}
+
+	server := server.New("", us)
+	server.Start()
 }
