@@ -6,13 +6,15 @@
 
 A golang app created with `yo golang`.
 
+> :construction_worker: This is work in progress and many things are subject to change
+
 ## Publish a Package
 
 Each package has its own directory, with subdirectories for package revisions. Their package folder contains various files describing how to install, uninstall and configure it.
 
 ### Folder Structure
 
-> Universes are best kept in Gits
+> Your universe is best kept in a Git to have revisions
 
 A universe has the following folder structure.
 
@@ -28,6 +30,14 @@ A universe has the following folder structure.
     │   ├── uninstall.json
     │   ├── marathon.json
     │   ├── package.json
+    └── ...
+```
+
+All meta information about a universe must also be stored within.
+
+```
+└── meta
+    ├── schema.json
     └── ...
 ```
 
