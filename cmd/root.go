@@ -18,12 +18,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/axelspringer/moppi/cfg"
 	"github.com/axelspringer/moppi/server"
 	"github.com/spf13/pflag"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/axelspringer/moppi/version"
 	homedir "github.com/mitchellh/go-homedir"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -31,6 +32,7 @@ import (
 var (
 	cfgFile string
 	verbose bool
+	config  *cfg.Config
 )
 
 // RootCmd represents the base command when called without any subcommands
@@ -118,4 +120,17 @@ func initConfig() {
 	if err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+
+	cmdCfg := &cfg.CmdConfig{
+		Verbose: verbose,
+	}
+
+	config, err := cfg.New(cmdCfg)
+	if err != nil {
+		// should be substitued with general errors, and string functions
+		log.Printf("Failed to create config: %v", err)
+		os.Exit(-1)
+	}
+
+	config.Logger.Info("Configuration initialized")
 }

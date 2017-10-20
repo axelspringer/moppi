@@ -15,16 +15,17 @@
 package cfg
 
 import (
+	"github.com/axelspringer/moppi/provider/etcd"
 	log "github.com/sirupsen/logrus"
 )
 
 // New returns a new config
 func New(cmdCfg *CmdConfig) (*Config, error) {
-	return
+	return mustNew(cmdCfg)
 }
 
 func mustNew(cmdCfg *CmdConfig) (*Config, error) {
-	var logger = cfg.logger
+	var logger = cmdCfg.Logger
 	if logger == nil {
 		logger = log.New()
 		// this is the standard setting
@@ -36,16 +37,19 @@ func mustNew(cmdCfg *CmdConfig) (*Config, error) {
 
 	// default Etcd
 	var defaultEtcd etcd.Provider
+	// subject to change
+	defaultEtcd.Prefix = "/moppi"
+	defaultEtcd.Endpoint = "127.0.0.1:2379"
 
 	providers := &Providers{
-		Etcd: defaultEtcd
+		Etcd: defaultEtcd,
 	}
 
 	cfg := &Config{
-		Logger: logger,
-		Verbose: cmdCfg.Verbose,
+		Logger:    logger,
+		Verbose:   cmdCfg.Verbose,
 		Providers: providers,
 	}
 
-	return c, nil
+	return cfg, nil
 }

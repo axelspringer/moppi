@@ -12,27 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cfg
+package version
 
-import (
-	"github.com/axelspringer/moppi/provider/etcd"
-	log "github.com/sirupsen/logrus"
-)
-
-// Config holds the persistent config of Moppi
-type Config struct {
-	Logger    *log.Logger
-	Verbose   bool
-	Providers *Providers
-}
-
-// Providers holds all available providers
-type Providers struct {
-	Etcd etcd.Provider
-}
-
-// CmdConfig holds the needed config of the command
-type CmdConfig struct {
-	Logger  *log.Logger
-	Verbose bool
-}
+// Version exports the current version of the app
+const Version = "0.0.1"

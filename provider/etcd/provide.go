@@ -15,6 +15,7 @@
 package etcd
 
 import (
+	"github.com/axelspringer/moppi/install"
 	"github.com/axelspringer/moppi/provider"
 	"github.com/axelspringer/moppi/provider/kv"
 	"github.com/docker/libkv/store"
@@ -26,6 +27,27 @@ var _ provider.Provider = (*Provider)(nil)
 // Provider holds configurations of the provider.
 type Provider struct {
 	kv.Provider
+}
+
+// New creates a new etcd provider
+func New(bucket string) error {
+	return mustNew(&bucket)
+}
+
+func mustNew(bucket *string) error {
+	p := new(Provider)
+	store, err := p.CreateStore(*bucket)
+	if err != nil {
+		return err
+	}
+	p.SetKVClient(store)
+
+	return nil
+}
+
+// Package gets a package from etcd
+func (p *Provider) Package(name string, version int) (*install.Package, error) {
+	return p.Provider.Package(name, version)
 }
 
 // CreateStore creates the etcd store

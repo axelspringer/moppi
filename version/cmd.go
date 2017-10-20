@@ -20,9 +20,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Version exports the current version of the app
-const Version = "0.0.1"
-
 // NewCmd returns the new subcommand version
 func NewCmd() *cobra.Command {
 	// suprise, create a new version command
