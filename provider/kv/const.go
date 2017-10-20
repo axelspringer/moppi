@@ -12,17 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package kv
 
-import "encoding/json"
+import "time"
 
-// NewPackageRequest parses the request body to a PackageRequest
-func NewPackageRequest(data []byte) (req *PackageRequest, err error) {
-	req = &PackageRequest{}
-
-	if len(data) > 0 {
-		err = json.Unmarshal(data, &req)
-	}
-
-	return req, err
-}
+const (
+	connectionTimeout = 30 * time.Second
+)

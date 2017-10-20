@@ -12,37 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package cfg
 
 import (
-	"os"
-
-	"github.com/axelspringer/moppi/mesos"
-
-	marathon "github.com/gambol99/go-marathon"
+	"github.com/axelspringer/moppi/provider/etcd"
+	log "github.com/sirupsen/logrus"
 )
 
-// Server holds the state of a new Server
-type Server struct {
-	listen    *string
-	universes []*Universe
-	signals   chan os.Signal
-	marathon  marathon.Marathon
-	mesos     *mesos.Mesos
+// Config holds the persistent config of Moppi
+type Config struct {
+	Logger    *log.Logger
+	Verbose   bool
+	Providers *Provider
 }
 
-// Universe describes a complete universe
-type Universe struct {
-	Path *string
-}
-
-// Health describes the health of the api
-type Health struct {
-	Universes []*Universe
-}
-
-// Error contains an error of the api
-type Error struct {
-	Msg string
-	Err string
+// Providers holds all available providers
+type Providers struct {
+	Etcd etcd.Provider
 }

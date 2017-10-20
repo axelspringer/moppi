@@ -12,37 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package etcd
 
 import (
-	"os"
-
-	"github.com/axelspringer/moppi/mesos"
-
-	marathon "github.com/gambol99/go-marathon"
+	"github.com/axelspringer/moppi/provider"
+	"github.com/axelspringer/moppi/provider/kv"
+	"github.com/docker/libkv/store"
+	"github.com/docker/libkv/store/etcd"
 )
 
-// Server holds the state of a new Server
-type Server struct {
-	listen    *string
-	universes []*Universe
-	signals   chan os.Signal
-	marathon  marathon.Marathon
-	mesos     *mesos.Mesos
+var _ provider.Provider = (*Provider)(nil)
+
+// Provider holds configurations of the provider.
+type Provider struct {
+	kv.Provider
 }
 
-// Universe describes a complete universe
-type Universe struct {
-	Path *string
-}
+// CreateStore creates the etcd store
+func (p *Provider) CreateStore(bucket string) (store.Store, error) {
+	p.SetStoreType(store.ETCD)
+	etcd.Register()
 
-// Health describes the health of the api
-type Health struct {
-	Universes []*Universe
-}
-
-// Error contains an error of the api
-type Error struct {
-	Msg string
-	Err string
+	return p.Provider.CreateStore(bucket)
 }

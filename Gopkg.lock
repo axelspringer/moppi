@@ -8,10 +8,40 @@
   version = "v1.0.3"
 
 [[projects]]
+  name = "github.com/dghubble/sling"
+  packages = ["."]
+  revision = "eb56e89ac5088bebb12eef3cb4b293300f43608b"
+  version = "v1.1.0"
+
+[[projects]]
+  name = "github.com/docker/libkv"
+  packages = ["store"]
+  revision = "aabc039ad04deb721e234f99cd1b4aa28ac71a40"
+  version = "v0.2.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/donovanhide/eventsource"
+  packages = ["."]
+  revision = "b8f31a59085e69dd2678cf51840db2ac625cb741"
+
+[[projects]]
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
   revision = "629574ca2a5df945712d3079857300b5e4da0236"
   version = "v1.4.2"
+
+[[projects]]
+  name = "github.com/gambol99/go-marathon"
+  packages = ["."]
+  revision = "6b00a5b651b1beb2c6821863f7c60df490bd46c8"
+  version = "v0.7.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/google/go-querystring"
+  packages = ["query"]
+  revision = "53e6ce116135b80d037921a7fdd5138cf32d7a8a"
 
 [[projects]]
   branch = "master"
@@ -118,6 +148,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c1cd27fc7f8e95181246bce46a0736e490f99baa2da8ce41f0d646790c03dd2e"
+  inputs-digest = "f79caa75e756f611fa6c4695875304fcf09ffb9f95fd76ccac351a87456751e6"
   solver-name = "gps-cdcl"
   solver-version = 1

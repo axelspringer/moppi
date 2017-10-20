@@ -12,37 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package install
 
-import (
-	"os"
+import "encoding/json"
 
-	"github.com/axelspringer/moppi/mesos"
+// NewPackageRequest parses the request body to a PackageRequest
+func NewPackageRequest(data []byte) (req *PackageRequest, err error) {
+	req = &PackageRequest{}
 
-	marathon "github.com/gambol99/go-marathon"
-)
+	if len(data) > 0 {
+		err = json.Unmarshal(data, &req)
+	}
 
-// Server holds the state of a new Server
-type Server struct {
-	listen    *string
-	universes []*Universe
-	signals   chan os.Signal
-	marathon  marathon.Marathon
-	mesos     *mesos.Mesos
-}
-
-// Universe describes a complete universe
-type Universe struct {
-	Path *string
-}
-
-// Health describes the health of the api
-type Health struct {
-	Universes []*Universe
-}
-
-// Error contains an error of the api
-type Error struct {
-	Msg string
-	Err string
+	return req, err
 }

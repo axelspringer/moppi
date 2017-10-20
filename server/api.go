@@ -20,14 +20,20 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"syscall"
 
+	"github.com/axelspringer/moppi/mesos"
+
+	marathon "github.com/gambol99/go-marathon"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/web"
 )
 
 const (
 	okString        = "OK"
-	defaultListener = "localhost:8080"
+	defaultListener = "0.0.0.0:8080"
 )
 
 // New returns a new instance of a Server
@@ -43,7 +49,34 @@ func New(listen string, universes []*Universe) *Server {
 func mustNew(listen *string, universes []*Universe) *Server {
 	signals := make(chan os.Signal, 1)
 
-	return &Server{listen, universes, signals}
+	// create new Marathon client
+	marathonConfig := marathon.NewDefaultConfig()
+	marathonConfig.URL = viper.GetString("marathon")
+	marathonClient, err := marathon.NewClient(marathonConfig)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// creating new Mesos client
+	httpClient := &http.Client{}
+	mesosClient := mesos.New(httpClient, viper.GetString("mesos"))
+
+	return &Server{
+		listen:    listen,
+		universes: universes,
+		signals:   signals,
+		marathon:  marathonClient,
+		mesos:     mesosClient,
+	}
+}
+
+// Run is running the server as cobra command
+func Run(cmd *cobra.Command, args []string) {
+	u := &Universe{}
+	us := []*Universe{u}
+
+	server := New("", us)
+	server.Start()
 }
 
 // ping just returns a 200 and the okString
@@ -73,7 +106,6 @@ func (server *Server) installPackage(w http.ResponseWriter, req *http.Request) {
 		writeErrorJSON(w, "Could not parse the package request", 400, err)
 		return
 	}
-
 	fmt.Println(pkgRequest.Name)
 
 	w.WriteHeader(201)
@@ -81,7 +113,15 @@ func (server *Server) installPackage(w http.ResponseWriter, req *http.Request) {
 
 // uninstallPackage tries to uninstall a package
 func (server *Server) uninstallPackage(w http.ResponseWriter, req *http.Request) {
+	req.Header.Add("Accept", "application/json")
 
+	_, err := parsePackageRequest(req.Body)
+	if err != nil {
+		writeErrorJSON(w, "Could not parse the package request", 400, err)
+		return
+	}
+
+	w.WriteHeader(204)
 }
 
 // Start is starting to serve the api
@@ -93,7 +133,8 @@ func (server *Server) Start() {
 	// create listener
 	listener, err := net.Listen("tcp", *server.listen)
 	if err != nil {
-		fmt.Printf("Could not create listener")
+		fmt.Println(err)
+		syscall.Kill(syscall.Getpid(), syscall.SIGTERM)
 	}
 
 	// setup routes

@@ -18,10 +18,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/axelspringer/moppi/server"
 	"github.com/spf13/pflag"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/axelspringer/moppi/server"
 	"github.com/axelspringer/moppi/version"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -40,7 +40,7 @@ var RootCmd = &cobra.Command{
 	// TODO: should be added later
 	Long: ``,
 	// Run the root command
-	Run: run,
+	Run: server.Run,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -118,12 +118,4 @@ func initConfig() {
 	if err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
-}
-
-func run(cmd *cobra.Command, args []string) {
-	u := &server.Universe{}
-	us := []*server.Universe{u}
-
-	server := server.New("", us)
-	server.Start()
 }

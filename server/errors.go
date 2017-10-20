@@ -14,35 +14,12 @@
 
 package server
 
-import (
-	"os"
+import "fmt"
 
-	"github.com/axelspringer/moppi/mesos"
+// PackageRequestFieldMissing is a new type that inherits error
+type PackageRequestFieldMissing string
 
-	marathon "github.com/gambol99/go-marathon"
-)
-
-// Server holds the state of a new Server
-type Server struct {
-	listen    *string
-	universes []*Universe
-	signals   chan os.Signal
-	marathon  marathon.Marathon
-	mesos     *mesos.Mesos
-}
-
-// Universe describes a complete universe
-type Universe struct {
-	Path *string
-}
-
-// Health describes the health of the api
-type Health struct {
-	Universes []*Universe
-}
-
-// Error contains an error of the api
-type Error struct {
-	Msg string
-	Err string
+// Error returns a custom error
+func (err PackageRequestFieldMissing) Error() string {
+	return fmt.Sprintf("A field is missing: %v", string(err))
 }

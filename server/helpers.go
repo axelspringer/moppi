@@ -20,6 +20,9 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
+
+	"github.com/axelspringer/moppi/install"
 )
 
 // writeJson emits a success and writes the JSON
@@ -43,17 +46,27 @@ func writeErrorJSON(w http.ResponseWriter, msg string, status int, err error) {
 }
 
 // parsePackageRequest parses a package request to PackageRequest
-func parsePackageRequest(r io.Reader) (*PackageRequest, error) {
+func parsePackageRequest(r io.Reader) (*install.PackageRequest, error) {
 	body, err := ioutil.ReadAll(r)
 	if err != nil {
 		// here we should log request
 		return nil, err
 	}
 
-	req, err := NewPackageRequest(body)
+	req, err := install.NewPackageRequest(body)
 	if err != nil {
 		return nil, err
 	}
 
+	if req.Name == "" {
+		return nil, PackageRequestFieldMissing("Name")
+	}
+
 	return req, err
+}
+
+// getHostname returns the hostname
+func getHostname() (hostname string, err error) {
+	host, err := os.Hostname()
+	return host, err
 }
