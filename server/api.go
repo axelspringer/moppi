@@ -17,66 +17,57 @@ package server
 import (
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"os"
-	"syscall"
 
+	"github.com/axelspringer/moppi/cfg"
 	"github.com/axelspringer/moppi/mesos"
 
+	chronos "github.com/axelspringer/go-chronos"
 	marathon "github.com/gambol99/go-marathon"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/web"
 )
 
 const (
-	okString        = "OK"
-	defaultListener = "0.0.0.0:8080"
+	okString = "OK"
 )
 
 // New returns a new instance of a Server
-func New(listen string, universes []*Universe) *Server {
-	if listen == "" {
-		listen = defaultListener
-	}
-
-	return mustNew(&listen, universes)
+func New(cfg *cfg.Config) (*Server, error) {
+	return mustNew(cfg)
 }
 
 // mustNew wraps the creation of a new Server
-func mustNew(listen *string, universes []*Universe) *Server {
+func mustNew(cfg *cfg.Config) (*Server, error) {
 	signals := make(chan os.Signal, 1)
 
 	// create new Marathon client
 	marathonConfig := marathon.NewDefaultConfig()
-	marathonConfig.URL = viper.GetString("marathon")
+	marathonConfig.URL = cfg.CmdConfig.Marathon
 	marathonClient, err := marathon.NewClient(marathonConfig)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	// creating new Mesos client
 	httpClient := &http.Client{}
-	mesosClient := mesos.New(httpClient, viper.GetString("mesos"))
+	mesosClient := mesos.New(httpClient, cfg.CmdConfig.Mesos)
 
-	return &Server{
-		listen:    listen,
-		universes: universes,
-		signals:   signals,
-		marathon:  marathonClient,
-		mesos:     mesosClient,
+	// creating new Chronos client
+	chronosClient := chronos.New(cfg.CmdConfig.Chronos, httpClient)
+
+	// server config
+	server := &Server{
+		cfg:      cfg,
+		log:      cfg.Logger,
+		signals:  signals,
+		marathon: marathonClient,
+		mesos:    mesosClient,
+		chronos:  chronosClient,
 	}
-}
 
-// Run is running the server as cobra command
-func Run(cmd *cobra.Command, args []string) {
-	u := &Universe{}
-	us := []*Universe{u}
-
-	server := New("", us)
-	server.Start()
+	return server, nil
 }
 
 // ping just returns a 200 and the okString
@@ -86,15 +77,13 @@ func (server *Server) ping(c web.C, w http.ResponseWriter, _ *http.Request) {
 
 // health returns health infos about the api
 func (server *Server) health(c web.C, w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, &Health{
-		Universes: server.universes,
-	})
+	writeJSON(w, &cfg.Universe{})
 	return
 }
 
 // universes returns the current configured universes
 func (server *Server) allUniverses(c web.C, w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, server.universes)
+	writeJSON(w, &cfg.Universe{})
 }
 
 // installPackage tries to install a package
@@ -130,13 +119,6 @@ func (server *Server) Start() {
 	server.configSignals()
 	go server.watchSignals()
 
-	// create listener
-	listener, err := net.Listen("tcp", *server.listen)
-	if err != nil {
-		fmt.Println(err)
-		syscall.Kill(syscall.Getpid(), syscall.SIGTERM)
-	}
-
 	// setup routes
 	goji.Get("/ping", server.ping)
 	goji.Get("/health", server.health)
@@ -146,5 +128,10 @@ func (server *Server) Start() {
 	goji.Post("/uninstall", server.uninstallPackage)
 
 	// create server
-	goji.ServeListener(listener)
+	goji.ServeListener(server.cfg.Listener)
+}
+
+// Stop is stoping to serve the api
+func (server *Server) Stop() {
+	os.Exit(0)
 }

@@ -1,0 +1,6 @@
+verbose: true
+etcd:
+  prefix: "/moppi"
+  endpoint: "http://internal-kombinat-prod-managers-693486814.eu-west-1.elb.amazonaws.com:2379"
+chronos: "https://chronos.tortuga.services/"
+marathon: "https://marathon.tortuga.services/"

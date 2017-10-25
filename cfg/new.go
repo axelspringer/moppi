@@ -15,15 +15,19 @@
 package cfg
 
 import (
+	"net"
+
 	"github.com/axelspringer/moppi/provider/etcd"
 	log "github.com/sirupsen/logrus"
 )
 
 // New returns a new config
+// cmdCfg: is a CmdConfig that is used to create a config
 func New(cmdCfg *CmdConfig) (*Config, error) {
 	return mustNew(cmdCfg)
 }
 
+// mustNew wraps the creation of a new config
 func mustNew(cmdCfg *CmdConfig) (*Config, error) {
 	var logger = cmdCfg.Logger
 	if logger == nil {
@@ -38,14 +42,23 @@ func mustNew(cmdCfg *CmdConfig) (*Config, error) {
 	// default Etcd
 	var defaultEtcd etcd.Provider
 	// subject to change
-	defaultEtcd.Prefix = "/moppi"
-	defaultEtcd.Endpoint = "127.0.0.1:2379"
+	defaultEtcd.Prefix = cmdCfg.Etcd.Prefix
+	defaultEtcd.Endpoint = cmdCfg.Etcd.Endpoint
 
+	// providers
 	providers := &Providers{
 		Etcd: defaultEtcd,
 	}
 
+	// create listener
+	listener, err := net.Listen("tcp", cmdCfg.Listen)
+	if err != nil {
+		return nil, err
+	}
+
 	cfg := &Config{
+		CmdConfig: cmdCfg,
+		Listener:  listener,
 		Logger:    logger,
 		Verbose:   cmdCfg.Verbose,
 		Providers: providers,

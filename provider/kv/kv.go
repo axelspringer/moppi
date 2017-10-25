@@ -15,8 +15,6 @@
 package kv
 
 import (
-	"strings"
-
 	"github.com/axelspringer/moppi/install"
 	"github.com/axelspringer/moppi/provider"
 	"github.com/docker/libkv"
@@ -26,7 +24,7 @@ import (
 // Provider holds common configurations of key-value providers.
 type Provider struct {
 	provider.Provider
-	Endpoint  string
+	Endpoint  []string
 	Prefix    string
 	TLS       *ClientTLS
 	Username  string
@@ -74,7 +72,7 @@ func (p *Provider) CreateStore(bucket string) (store.Store, error) {
 
 	return libkv.NewStore(
 		p.storeType,
-		strings.Split(p.Endpoint, ","),
+		p.Endpoint,
 		storeConfig,
 	)
 }

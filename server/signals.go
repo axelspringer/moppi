@@ -15,8 +15,6 @@
 package server
 
 import (
-	"fmt"
-	"os"
 	"os/signal"
 	"syscall"
 )
@@ -32,11 +30,10 @@ func (s *Server) watchSignals() {
 		sig := <-s.signals
 		switch sig {
 		case syscall.SIGUSR1:
-			fmt.Println("Nothing to see here yet")
+			s.log.Infof("Nothing to see here yet")
 		default:
-			fmt.Println("Shutting gracefully down")
-			// s.Stop()
-			os.Exit(0)
+			s.log.Infof("Shutting gracefully down")
+			s.Stop()
 		}
 	}
 }

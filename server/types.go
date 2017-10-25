@@ -17,28 +17,27 @@ package server
 import (
 	"os"
 
+	"github.com/axelspringer/moppi/cfg"
 	"github.com/axelspringer/moppi/mesos"
 
+	chronos "github.com/axelspringer/go-chronos"
 	marathon "github.com/gambol99/go-marathon"
+	log "github.com/sirupsen/logrus"
 )
 
 // Server holds the state of a new Server
 type Server struct {
-	listen    *string
-	universes []*Universe
-	signals   chan os.Signal
-	marathon  marathon.Marathon
-	mesos     *mesos.Mesos
-}
-
-// Universe describes a complete universe
-type Universe struct {
-	Path *string
+	cfg      *cfg.Config
+	chronos  *chronos.Client
+	log      *log.Logger
+	marathon marathon.Marathon
+	mesos    *mesos.Mesos
+	signals  chan os.Signal
 }
 
 // Health describes the health of the api
 type Health struct {
-	Universes []*Universe
+	Universes []*cfg.Universe
 }
 
 // Error contains an error of the api

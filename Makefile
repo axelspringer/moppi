@@ -17,8 +17,11 @@ test: ## run tests, except integration tests
 	@go test ${RACE} ${PACKAGES}
 
 deps:
-	go get github.com/tcnksm/ghr
-	go get github.com/mitchellh/gox
+	go get -u github.com/tcnksm/ghr
+	go get -u github.com/mitchellh/gox
+	go get -u github.com/golang/dep/cmd/dep
+	go get -u github.com/onsi/gomega
+	go get -u github.com/onsi/ginkgo/ginkgo
 
 build:
 	@echo "Compiling..."
