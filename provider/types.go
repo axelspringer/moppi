@@ -14,10 +14,10 @@
 
 package provider
 
-import "github.com/axelspringer/moppi/install"
+import "github.com/axelspringer/moppi/pkg"
 
 // Provider defines the interface to a Provider (e.g. etcd)
 type Provider interface {
-	Package(name string, version int) (*install.Package, error)
+	Package(name string, version int) (*pkg.Package, error)
 	// Packages() (map[string]map[int]*install.Package, error)
 }

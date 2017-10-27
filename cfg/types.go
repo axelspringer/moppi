@@ -17,28 +17,30 @@ package cfg
 import (
 	"net"
 
-	"github.com/axelspringer/moppi/provider/etcd"
 	log "github.com/sirupsen/logrus"
 )
 
 // Config holds the persistent config of Moppi
 type Config struct {
+	Universes
 	CmdConfig *CmdConfig
-	Universes []*Universe
 	Listener  net.Listener
 	Logger    *log.Logger
 	Verbose   bool
-	Providers *Providers
 }
 
-// Universe describes a complete universe
-type Universe struct {
-	Path *string
-}
+// Universes describes a complete universe
+type Universes map[string]Providers
 
-// Providers holds all available providers
+// Providers describes available providers
 type Providers struct {
-	Etcd etcd.Provider
+	Etcd Provider
+}
+
+// Provider describes a Provider
+type Provider struct {
+	Prefix   string
+	Endpoint string
 }
 
 // CmdConfig holds the needed config of the command
@@ -50,12 +52,5 @@ type CmdConfig struct {
 	Mesos     string
 	Chronos   string
 	Zookeeper string
-	Etcd      *ProviderConfig
-}
-
-// ProviderConfig holds the config for an KV provider
-type ProviderConfig struct {
-	Enabled  bool
-	Endpoint []string
-	Prefix   string
+	Universes
 }

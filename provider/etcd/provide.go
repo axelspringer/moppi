@@ -15,7 +15,7 @@
 package etcd
 
 import (
-	"github.com/axelspringer/moppi/install"
+	"github.com/axelspringer/moppi/pkg"
 	"github.com/axelspringer/moppi/provider"
 	"github.com/axelspringer/moppi/provider/kv"
 	"github.com/docker/libkv/store"
@@ -34,6 +34,7 @@ func New(bucket string) error {
 	return mustNew(&bucket)
 }
 
+// mustNew wraps the creation of a new etcd provider
 func mustNew(bucket *string) error {
 	p := new(Provider)
 	store, err := p.CreateStore(*bucket)
@@ -46,7 +47,7 @@ func mustNew(bucket *string) error {
 }
 
 // Package gets a package from etcd
-func (p *Provider) Package(name string, version int) (*install.Package, error) {
+func (p *Provider) Package(name string, version int) (*pkg.Package, error) {
 	return p.Provider.Package(name, version)
 }
 

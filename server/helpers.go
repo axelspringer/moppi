@@ -45,15 +45,15 @@ func writeErrorJSON(w http.ResponseWriter, msg string, status int, err error) {
 	writeJSON(w, &Error{msg, err.Error()})
 }
 
-// parsePackageRequest parses a package request to PackageRequest
-func parsePackageRequest(r io.Reader) (*install.PackageRequest, error) {
+// parseRequest parses a package request to Request
+func parseRequest(r io.Reader) (*install.Request, error) {
 	body, err := ioutil.ReadAll(r)
 	if err != nil {
 		// here we should log request
 		return nil, err
 	}
 
-	req, err := install.NewPackageRequest(body)
+	req, err := install.NewRequest(body)
 	if err != nil {
 		return nil, err
 	}

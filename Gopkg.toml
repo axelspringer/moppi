@@ -19,3 +19,15 @@
 #  name = "github.com/x/y"
 #  version = "2.4.0"
 
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/mitchellh/mapstructure"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/containous/staert"
+
+[[constraint]]
+  name = "github.com/jonboulle/clockwork"
+  version = "0.1.0"

@@ -17,7 +17,6 @@ package cfg
 import (
 	"net"
 
-	"github.com/axelspringer/moppi/provider/etcd"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -39,17 +38,6 @@ func mustNew(cmdCfg *CmdConfig) (*Config, error) {
 		}
 	}
 
-	// default Etcd
-	var defaultEtcd etcd.Provider
-	// subject to change
-	defaultEtcd.Prefix = cmdCfg.Etcd.Prefix
-	defaultEtcd.Endpoint = cmdCfg.Etcd.Endpoint
-
-	// providers
-	providers := &Providers{
-		Etcd: defaultEtcd,
-	}
-
 	// create listener
 	listener, err := net.Listen("tcp", cmdCfg.Listen)
 	if err != nil {
@@ -57,11 +45,11 @@ func mustNew(cmdCfg *CmdConfig) (*Config, error) {
 	}
 
 	cfg := &Config{
+		Universes: cmdCfg.Universes,
 		CmdConfig: cmdCfg,
 		Listener:  listener,
 		Logger:    logger,
 		Verbose:   cmdCfg.Verbose,
-		Providers: providers,
 	}
 
 	return cfg, nil

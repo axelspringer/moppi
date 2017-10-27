@@ -15,56 +15,37 @@
 package server
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"os"
 
 	"github.com/axelspringer/moppi/cfg"
-	"github.com/axelspringer/moppi/mesos"
+	"github.com/axelspringer/moppi/install"
 
-	chronos "github.com/axelspringer/go-chronos"
-	marathon "github.com/gambol99/go-marathon"
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/web"
 )
 
-const (
-	okString = "OK"
-)
-
 // New returns a new instance of a Server
-func New(cfg *cfg.Config) (*Server, error) {
-	return mustNew(cfg)
+func New(config *cfg.Config) (*Server, error) {
+	return mustNew(config)
 }
 
 // mustNew wraps the creation of a new Server
-func mustNew(cfg *cfg.Config) (*Server, error) {
+func mustNew(config *cfg.Config) (*Server, error) {
 	signals := make(chan os.Signal, 1)
 
-	// create new Marathon client
-	marathonConfig := marathon.NewDefaultConfig()
-	marathonConfig.URL = cfg.CmdConfig.Marathon
-	marathonClient, err := marathon.NewClient(marathonConfig)
+	installer, err := install.New(config)
 	if err != nil {
 		return nil, err
 	}
 
-	// creating new Mesos client
-	httpClient := &http.Client{}
-	mesosClient := mesos.New(httpClient, cfg.CmdConfig.Mesos)
-
-	// creating new Chronos client
-	chronosClient := chronos.New(cfg.CmdConfig.Chronos, httpClient)
-
 	// server config
 	server := &Server{
-		cfg:      cfg,
-		log:      cfg.Logger,
-		signals:  signals,
-		marathon: marathonClient,
-		mesos:    mesosClient,
-		chronos:  chronosClient,
+		cfg:       config,
+		log:       config.Logger,
+		installer: installer,
+		signals:   signals,
 	}
 
 	return server, nil
@@ -77,25 +58,29 @@ func (server *Server) ping(c web.C, w http.ResponseWriter, _ *http.Request) {
 
 // health returns health infos about the api
 func (server *Server) health(c web.C, w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, &cfg.Universe{})
 	return
 }
 
 // universes returns the current configured universes
 func (server *Server) allUniverses(c web.C, w http.ResponseWriter, _ *http.Request) {
-	writeJSON(w, &cfg.Universe{})
+	return
 }
 
 // installPackage tries to install a package
 func (server *Server) installPackage(w http.ResponseWriter, req *http.Request) {
 	req.Header.Add("Accept", "application/json")
 
-	pkgRequest, err := parsePackageRequest(req.Body)
+	pkgRequest, err := parseRequest(req.Body)
 	if err != nil {
 		writeErrorJSON(w, "Could not parse the package request", 400, err)
 		return
 	}
-	fmt.Println(pkgRequest.Name)
+
+	err = server.installer.Request(pkgRequest)
+	if err != nil {
+		writeErrorJSON(w, "Could not fullfill the package request", 400, err)
+		return
+	}
 
 	w.WriteHeader(201)
 }
@@ -104,7 +89,7 @@ func (server *Server) installPackage(w http.ResponseWriter, req *http.Request) {
 func (server *Server) uninstallPackage(w http.ResponseWriter, req *http.Request) {
 	req.Header.Add("Accept", "application/json")
 
-	_, err := parsePackageRequest(req.Body)
+	_, err := parseRequest(req.Body)
 	if err != nil {
 		writeErrorJSON(w, "Could not parse the package request", 400, err)
 		return

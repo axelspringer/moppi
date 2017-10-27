@@ -12,17 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package install
+package server
 
-import "encoding/json"
-
-// NewRequest parses the request body to a Request
-func NewRequest(data []byte) (req *Request, err error) {
-	req = &Request{}
-
-	if len(data) > 0 {
-		err = json.Unmarshal(data, &req)
-	}
-
-	return req, err
-}
+const (
+	okString = "OK"
+)

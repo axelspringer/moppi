@@ -15,7 +15,7 @@
 package kv
 
 import (
-	"github.com/axelspringer/moppi/install"
+	"github.com/axelspringer/moppi/pkg"
 	"github.com/axelspringer/moppi/provider"
 	"github.com/docker/libkv"
 	"github.com/docker/libkv/store"
@@ -44,13 +44,13 @@ func (p *Provider) SetKVClient(kvClient store.Store) {
 }
 
 // Package return a package
-func (p *Provider) Package(name string, version int) (*install.Package, error) {
-	return &install.Package{}, nil
+func (p *Provider) Package(name string, version int) (*pkg.Package, error) {
+	return &pkg.Package{}, nil
 }
 
 // Packages returns all available packages
-func (p *Provider) Packages() ([]*install.Package, error) {
-	return []*install.Package{}, nil
+func (p *Provider) Packages() ([]*pkg.Package, error) {
+	return []*pkg.Package{}, nil
 }
 
 // CreateStore creates the K/V store

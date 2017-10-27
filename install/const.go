@@ -14,15 +14,16 @@
 
 package install
 
-import "encoding/json"
+const (
+	defaultBucket = "moppi"
+)
 
-// NewRequest parses the request body to a Request
-func NewRequest(data []byte) (req *Request, err error) {
-	req = &Request{}
-
-	if len(data) > 0 {
-		err = json.Unmarshal(data, &req)
-	}
-
-	return req, err
-}
+const (
+	moppiUniverseVersion   = "/meta/version"
+	moppiUniversePackages  = "/packages"
+	moppiUniverseMarathon  = "/marathon"
+	moppiUniverseChronos   = "/chronos"
+	moppiUniverseInstall   = "/install"
+	moppiUniverseUninstall = "/uninstall"
+	moppiUniversePackage   = "/package"
+)

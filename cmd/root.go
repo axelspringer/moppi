@@ -18,10 +18,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/axelspringer/moppi/cfg"
 	"github.com/axelspringer/moppi/server"
+	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/pflag"
 
 	"github.com/axelspringer/moppi/version"
@@ -31,11 +31,8 @@ import (
 )
 
 const (
-	defaultListener     = "localhost:8080"
-	defaultVerbose      = false
-	defaultEtcd         = true
-	defaultEtcdPrefix   = "/moppi"
-	defaultEtcdEndpoint = "http://localhost:2379"
+	defaultListener = "localhost:8080"
+	defaultVerbose  = false
 )
 
 var (
@@ -83,11 +80,6 @@ func init() {
 	// Bind to
 	RootCmd.PersistentFlags().StringVarP(&listener, "listen", "", defaultListener, "Bind listener to (Default: localhost:8080)")
 
-	// etcd
-	RootCmd.PersistentFlags().BoolP("etcd", "", defaultEtcd, "Enable the etcd provider")
-	RootCmd.PersistentFlags().StringP("etcdEndpoint", "", defaultEtcdEndpoint, "Comma-seperated list of etcd endpoints")
-	RootCmd.PersistentFlags().StringP("etcdPrefix", "", defaultEtcdPrefix, "Prefix used for KV")
-
 	// Some more specific flags
 	RootCmd.PersistentFlags().String("chronos", "", "List of Zookeepers")
 	RootCmd.PersistentFlags().String("marathon", "", "Marathon Endpoint")
@@ -107,6 +99,7 @@ func addCommands(cmd *cobra.Command) {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	var err error
+	var universes cfg.Universes
 
 	for _, flags := range []*pflag.FlagSet{RootCmd.PersistentFlags()} {
 		err = viper.BindPFlags(flags)
@@ -142,11 +135,15 @@ func initConfig() {
 		log.Infof("Using config file:", viper.ConfigFileUsed())
 	}
 
-	// etcd config
-	etcdCfg := &cfg.ProviderConfig{
-		Enabled:  viper.GetBool("etcd"),
-		Endpoint: strings.Split(viper.GetString("etcdEndpoint"), ","),
-		Prefix:   viper.GetString("etcdPrefix"),
+	// try to extract universes
+	err = mapstructure.Decode(viper.GetStringMap("universes"), &universes)
+	if err != nil {
+		panic(err)
+	}
+
+	if len(universes) == 0 {
+		log.Fatal("No universes configured")
+		os.Exit(-1)
 	}
 
 	// construct a command config, which can then be further used
@@ -157,7 +154,7 @@ func initConfig() {
 		Marathon:  viper.GetString("marathon"),
 		Mesos:     viper.GetString("mesos"),
 		Zookeeper: viper.GetString("zookeeper"),
-		Etcd:      etcdCfg,
+		Universes: universes,
 	}
 
 	config, err = cfg.New(cmdCfg)

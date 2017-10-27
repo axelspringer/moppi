@@ -18,26 +18,17 @@ import (
 	"os"
 
 	"github.com/axelspringer/moppi/cfg"
-	"github.com/axelspringer/moppi/mesos"
+	"github.com/axelspringer/moppi/install"
 
-	chronos "github.com/axelspringer/go-chronos"
-	marathon "github.com/gambol99/go-marathon"
 	log "github.com/sirupsen/logrus"
 )
 
 // Server holds the state of a new Server
 type Server struct {
-	cfg      *cfg.Config
-	chronos  *chronos.Client
-	log      *log.Logger
-	marathon marathon.Marathon
-	mesos    *mesos.Mesos
-	signals  chan os.Signal
-}
-
-// Health describes the health of the api
-type Health struct {
-	Universes []*cfg.Universe
+	cfg       *cfg.Config
+	log       *log.Logger
+	signals   chan os.Signal
+	installer *install.Installer
 }
 
 // Error contains an error of the api

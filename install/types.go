@@ -14,44 +14,48 @@
 
 package install
 
-import marathon "github.com/gambol99/go-marathon"
+import (
+	"log"
 
-// PackageRequest describes an request for installing/uninstalling
+	chronos "github.com/axelspringer/go-chronos"
+	"github.com/axelspringer/moppi/cfg"
+	"github.com/axelspringer/moppi/mesos"
+	"github.com/docker/libkv/store"
+	marathon "github.com/gambol99/go-marathon"
+)
+
+// Request describes an request for installing/uninstalling
 // a package from different universes
-type PackageRequest struct {
-	Name     string               `json:"name"`
-	Universe string               `json:"universe"`
-	Version  string               `json:"version"`
-	Config   PackageRequestConfig `json:"config"`
+type Request struct {
+	Name     string        `json:"name"`
+	Universe string        `json:"universe"`
+	Revision string        `json:"revision"`
+	Config   RequestConfig `json:"config"`
 }
 
-// PackageRequestConfig describes the config of a package installment
-type PackageRequestConfig struct {
+// RequestConfig describes a passed in config for installer Request
+type RequestConfig struct {
 }
 
-// PackageInstall describes a running package installment
-type PackageInstall struct {
-	Request *PackageRequest
+// Installer describes the config of a package installment
+type Installer struct {
+	cfg      *cfg.Config
+	chronos  *chronos.Client
+	log      *log.Logger
+	marathon marathon.Marathon
+	mesos    *mesos.Mesos
+	stores   map[string]*Store
+}
+
+// Store describes a store
+type Store struct {
+	prefix   string
+	endpoint []string
+	kv       store.Store
 }
 
 // Install describes an installment (contained in install.json)
 type Install struct {
-}
-
-// Uninstall describes an Un-installment (contained in uninstall.json)
-type Uninstall struct {
-}
-
-// Info describes the package (contained in package.json)
-type Info struct {
-}
-
-// @TODO Chronos needs to be integrated, type, package and client
-
-// Package describes a package from an universe
-type Package struct {
-	Marathon  marathon.Application
-	Info      Info
-	Install   Install
-	Uninstall Uninstall
+	Marathon bool `json:"marathon"`
+	Chronos  bool `json:"chronos"`
 }
