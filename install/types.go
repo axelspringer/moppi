@@ -16,6 +16,7 @@ package install
 
 import (
 	"log"
+	"time"
 
 	chronos "github.com/axelspringer/go-chronos"
 	"github.com/axelspringer/moppi/cfg"
@@ -58,4 +59,16 @@ type Store struct {
 type Install struct {
 	Marathon bool `json:"marathon"`
 	Chronos  bool `json:"chronos"`
+}
+
+type WorkRequest struct {
+	Name  string
+	Delay time.Duration
+}
+
+type Worker struct {
+	ID          int
+	Work        chan WorkRequest
+	WorkerQueue chan chan WorkRequest
+	QuitChan    chan bool
 }
