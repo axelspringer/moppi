@@ -91,11 +91,15 @@ func mustNew(config *cfg.Config) (*Installer, error) {
 	// creating new Chronos client
 	chronosClient := chronos.New(config.CmdConfig.Chronos, httpClient)
 
-	return &Installer{
+	// creating installer
+	installer := &Installer{
 		cfg:      config,
 		marathon: marathonClient,
 		mesos:    mesosClient,
 		chronos:  chronosClient,
 		stores:   stores,
-	}, nil
+	}
+	StartDispatcher(4, installer)
+
+	return installer, nil
 }

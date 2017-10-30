@@ -17,52 +17,48 @@ package install
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"log"
-
-	"github.com/gambol99/go-marathon"
 )
 
 // Request is requesting an install
 func (i *Installer) Request(req *Request) error {
+
+	// prepare
+	work := WorkRequest{}
+
 	store := i.stores[req.Universe]
 	if store == nil {
 		return errors.New("Could not fullfil the request")
 	}
-
 	prefix := store.prefix + moppiUniversePackages + "/" + req.Name + "/" + req.Revision
+
 	// package
-	val, err := store.kv.Get(prefix + moppiUniversePackage)
+	kvPkg, err := store.kv.Get(prefix + moppiUniversePackage)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(kvPkg.Value, &work.Chronos)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(string(val.Value))
+	// read chronos
+	kvChronos, err := store.kv.Get(prefix + moppiUniverseChronos)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(kvChronos.Value, &work.Chronos)
 
-	// chronos
-	val, err = store.kv.Get(prefix + moppiUniverseChronos)
+	// read marathon
+	kvMarathon, err := store.kv.Get(prefix + moppiUniverseMarathon)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(kvMarathon.Value, &work.Marathon)
 	if err != nil {
 		return err
 	}
 
-	fmt.Println(string(val.Value))
-
-	// marathon
-	val, err = store.kv.Get(prefix + moppiUniverseMarathon)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(string(val.Value))
-
-	app := &marathon.Application{}
-	err = json.Unmarshal(val.Value, &app)
-
-	if _, err := i.marathon.CreateApplication(app); err != nil {
-		log.Fatalf("Failed to create application: %s, error: %s", app, err)
-	} else {
-		log.Printf("Created the application: %s", app)
-	}
+	workQueue <- work
 
 	return nil
 }

@@ -14,5 +14,5 @@
 
 package install
 
-// A buffered channel that we can send work requests on.
-var WorkQueue = make(chan WorkRequest, 100)
+// workQueue is buffered channel that we can send work requests on.
+var workQueue = make(chan WorkRequest, 100)

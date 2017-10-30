@@ -61,14 +61,28 @@ type Install struct {
 	Chronos  bool `json:"chronos"`
 }
 
-type WorkRequest struct {
-	Name  string
-	Delay time.Duration
+// Uninstall describes an uninstallment
+type Uninstall struct{}
+
+// Package describes an package
+type Package struct {
 }
 
+// WorkRequest is describing a workload to do
+type WorkRequest struct {
+	Name      string
+	Install   Install
+	Uninstall Uninstall
+	Marathon  marathon.Application
+	Chronos   chronos.Job
+	Delay     time.Duration
+}
+
+// Worker is describing a worker to which work can be send
 type Worker struct {
 	ID          int
 	Work        chan WorkRequest
 	WorkerQueue chan chan WorkRequest
 	QuitChan    chan bool
+	Installer   *Installer
 }

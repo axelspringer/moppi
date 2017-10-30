@@ -16,28 +16,28 @@ package install
 
 import "fmt"
 
-var WorkerQueue chan chan WorkRequest
+var (
+	workerQueue chan chan WorkRequest
+)
 
-func StartDispatcher(nworkers int) {
+// StartDispatcher is providing the WorkerQueue
+func StartDispatcher(workers int, installer *Installer) {
 	// First, initialize the channel we are going to but the workers' work channels into.
-	WorkerQueue = make(chan chan WorkRequest, nworkers)
+	workerQueue = make(chan chan WorkRequest, workers)
 
 	// Now, create all of our workers.
-	for i := 0; i < nworkers; i++ {
+	for i := 0; i < workers; i++ {
 		fmt.Println("Starting worker", i+1)
-		worker := NewWorker(i+1, WorkerQueue)
+		worker := NewWorker(i+1, workerQueue, installer)
 		worker.Start()
 	}
 
 	go func() {
 		for {
 			select {
-			case work := <-WorkQueue:
-				fmt.Println("Received work requeust")
+			case work := <-workQueue:
 				go func() {
-					worker := <-WorkerQueue
-
-					fmt.Println("Dispatching work request")
+					worker := <-workerQueue
 					worker <- work
 				}()
 			}
