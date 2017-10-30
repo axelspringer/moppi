@@ -59,10 +59,14 @@ type Store struct {
 type Install struct {
 	Marathon bool `json:"marathon"`
 	Chronos  bool `json:"chronos"`
+	Update   bool `json:"update"`
 }
 
 // Uninstall describes an uninstallment
-type Uninstall struct{}
+type Uninstall struct {
+	Marathon bool `json:"marathon"`
+	Chronos  bool `json:"chronos"`
+}
 
 // Package describes an package
 type Package struct {
@@ -71,6 +75,7 @@ type Package struct {
 // WorkRequest is describing a workload to do
 type WorkRequest struct {
 	Name      string
+	Package   Package
 	Install   Install
 	Uninstall Uninstall
 	Marathon  marathon.Application

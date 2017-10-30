@@ -1,0 +1,14 @@
+{
+    "schedule": "R10/2012-10-01T05:52:00Z/PT2S",
+    "name": "example",
+    "epsilon": "PT15M",
+    "container": {
+      "type": "DOCKER",
+      "image": "alpine:3.6",
+      "network": "USER"
+    },
+    "cpus": "0.1",
+    "mem": "64",
+    "fetch": [],
+    "command": "echo 'Test'"
+}

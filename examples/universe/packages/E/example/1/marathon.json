@@ -1,0 +1,42 @@
+{
+  "id": "/example",
+  "cmd": null,
+  "cpus": 1,
+  "mem": 128,
+  "disk": 0,
+  "instances": 0,
+  "acceptedResourceRoles": [
+    "*"
+  ],
+  "container": {
+    "type": "DOCKER",
+    "volumes": [],
+    "docker": {
+      "image": "nginx",
+      "network": "USER",
+      "privileged": false,
+      "forcePullImage": false
+    }
+  },
+  "ipAddress": {
+    "networkName": "mesos"
+  },
+  "healthChecks": [
+    {
+      "gracePeriodSeconds": 300,
+      "intervalSeconds": 60,
+      "timeoutSeconds": 20,
+      "maxConsecutiveFailures": 3,
+      "port": 80,
+      "path": "/",
+      "protocol": "HTTP",
+      "ignoreHttp1xx": false
+    }
+  ],
+  "labels": {
+    "traefik.enable": "true",
+    "traefik.port": "80",
+    "traefik.docker.network": "mesos",
+    "traefik.frontend.rule": "Host:example.tortuga.services"
+  }
+}

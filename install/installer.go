@@ -36,7 +36,27 @@ func (i *Installer) Request(req *Request) error {
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(kvPkg.Value, &work.Chronos)
+	err = json.Unmarshal(kvPkg.Value, &work.Package)
+	if err != nil {
+		return err
+	}
+
+	// read install
+	kvInstall, err := store.kv.Get(prefix + moppiUniverseInstall)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(kvInstall.Value, &work.Install)
+	if err != nil {
+		return err
+	}
+
+	// read uninstall
+	kvUninstall, err := store.kv.Get(prefix + moppiUniverseUninstall)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(kvUninstall.Value, &work.Uninstall)
 	if err != nil {
 		return err
 	}
@@ -47,6 +67,9 @@ func (i *Installer) Request(req *Request) error {
 		return err
 	}
 	err = json.Unmarshal(kvChronos.Value, &work.Chronos)
+	if err != nil {
+		return err
+	}
 
 	// read marathon
 	kvMarathon, err := store.kv.Get(prefix + moppiUniverseMarathon)

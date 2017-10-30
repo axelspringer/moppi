@@ -1,0 +1,5 @@
+{
+    "marathon": true,
+    "chronos": true,
+    "update": true
+}

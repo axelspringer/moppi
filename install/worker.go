@@ -15,7 +15,7 @@
 package install
 
 import (
-	"fmt"
+	"log"
 	"time"
 )
 
@@ -43,8 +43,25 @@ func (w *Worker) Start() {
 
 			select {
 			case work := <-w.Work:
-				fmt.Printf("%v", work.Marathon.ID)
 				time.Sleep(work.Delay)
+
+				// deploy marathon
+				if work.Install.Marathon {
+					if _, err := w.Installer.marathon.CreateApplication(&work.Marathon); err != nil {
+						log.Printf("Failed to create application: %s, error: %s", work.Marathon.ID, err)
+					} else {
+						log.Printf("Created the application: %s", work.Marathon.ID)
+					}
+				}
+
+				// deploy chronos
+				if work.Install.Chronos {
+					if ok, _, _ := w.Installer.chronos.Job.New(&work.Chronos); !ok {
+						log.Printf("Failed to create job: %s, error: %s", work.Chronos.Name)
+					} else {
+						log.Printf("Created the application: %s", work.Chronos.Name)
+					}
+				}
 
 			case <-w.QuitChan:
 				return
