@@ -21,7 +21,6 @@ import (
 
 	"github.com/axelspringer/moppi/cfg"
 	"github.com/axelspringer/moppi/server"
-	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/pflag"
 
 	"github.com/axelspringer/moppi/version"
@@ -99,7 +98,6 @@ func addCommands(cmd *cobra.Command) {
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
 	var err error
-	var universes cfg.Universes
 
 	for _, flags := range []*pflag.FlagSet{RootCmd.PersistentFlags()} {
 		err = viper.BindPFlags(flags)
@@ -135,33 +133,16 @@ func initConfig() {
 		log.Infof("Using config file:", viper.ConfigFileUsed())
 	}
 
-	// try to extract universes
-	err = mapstructure.Decode(viper.GetStringMap("universes"), &universes)
-	if err != nil {
-		panic(err)
+	// Decode command config
+	var cmdCfg cfg.CmdConfig
+	if err = viper.Unmarshal(&cmdCfg); err != nil {
+		log.Fatalf("Unable to decode into config:, %v", err)
 	}
 
-	if len(universes) == 0 {
-		log.Fatal("No universes configured")
-		os.Exit(-1)
-	}
-
-	// construct a command config, which can then be further used
-	cmdCfg := &cfg.CmdConfig{
-		Verbose:   viper.GetBool("verbose"),
-		Listen:    viper.GetString("listen"),
-		Chronos:   viper.GetString("chronos"),
-		Marathon:  viper.GetString("marathon"),
-		Mesos:     viper.GetString("mesos"),
-		Zookeeper: viper.GetString("zookeeper"),
-		Universes: universes,
-	}
-
-	config, err = cfg.New(cmdCfg)
+	config, err = cfg.New(&cmdCfg)
 	if err != nil {
 		// should be substitued with general errors, and string functions
 		log.Fatalf("Failed to create config: %v", err)
-		os.Exit(-1)
 	}
 
 	// only log, when verbose is enabled

@@ -12,18 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package install
-
-const (
-	defaultBucket = "moppi"
-)
-
-const (
-	moppiUniverseVersion   = "/meta/version"
-	moppiUniversePackages  = "/packages"
-	moppiUniverseMarathon  = "/marathon"
-	moppiUniverseChronos   = "/chronos"
-	moppiUniverseInstall   = "/install"
-	moppiUniverseUninstall = "/uninstall"
-	moppiUniversePackage   = "/package"
-)
+package kv

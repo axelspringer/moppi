@@ -17,6 +17,7 @@ package cfg
 import (
 	"net"
 
+	"github.com/axelspringer/moppi/version"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -28,13 +29,17 @@ func New(cmdCfg *CmdConfig) (*Config, error) {
 
 // mustNew wraps the creation of a new config
 func mustNew(cmdCfg *CmdConfig) (*Config, error) {
-	var logger = cmdCfg.Logger
-	if logger == nil {
-		logger = log.New()
+	// config
+	var cfg Config
+
+	// check for logger
+	cfg.Logger = cmdCfg.Logger
+	if cfg.Logger == nil {
+		cfg.Logger = log.New()
 		// this is the standard setting
-		logger.SetLevel(log.WarnLevel)
+		cfg.Logger.SetLevel(log.WarnLevel)
 		if cmdCfg.Verbose {
-			logger.SetLevel(log.DebugLevel)
+			cfg.Logger.SetLevel(log.DebugLevel)
 		}
 	}
 
@@ -43,14 +48,29 @@ func mustNew(cmdCfg *CmdConfig) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	cfg.Listener = listener
 
-	cfg := &Config{
-		Universes: cmdCfg.Universes,
-		CmdConfig: cmdCfg,
-		Listener:  listener,
-		Logger:    logger,
-		Verbose:   cmdCfg.Verbose,
+	// map additional values
+	cfg.Chronos = cmdCfg.Chronos
+	cfg.Listen = cmdCfg.Listen
+	cfg.Listener = listener
+	cfg.Marathon = cmdCfg.Marathon
+	cfg.Mesos = cmdCfg.Mesos
+	cfg.Verbose = cmdCfg.Verbose
+	cfg.Zookeeper = cmdCfg.Zookeeper
+	cfg.Etcd = cmdCfg.Etcd
+
+	// initialize provider
+	store, err := cfg.Etcd.CreateStore(DefaultBucket)
+	if err != nil {
+		cfg.Logger.Fatalf("Initializing provider: %v", err)
+	}
+	cfg.Etcd.SetKVClient(store)
+
+	// check version of repo in provider
+	if ok, err := cfg.Etcd.CheckVersion(version.Version); !ok {
+		cfg.Logger.Fatalf("Initializing provider: %v", err)
 	}
 
-	return cfg, nil
+	return &cfg, nil
 }

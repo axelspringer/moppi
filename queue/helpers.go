@@ -12,29 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cfg
+package queue
 
-import (
-	"net"
+func install(i *Install) error {
+	installer := i.Installer
+	pkg := i.Package
 
-	"github.com/axelspringer/moppi/provider/etcd"
-	log "github.com/sirupsen/logrus"
-)
+	// deploy marathon
+	if pkg.Install.Marathon {
+		if _, err := installer.Marathon.CreateApplication(&pkg.Marathon); err != nil {
+			return err
+		}
+	}
 
-// Config holds the persistent config of Moppi
-type Config struct {
-	CmdConfig
-	Listener net.Listener
-}
+	// deploy chronos
+	if pkg.Install.Chronos {
+		if ok, _, err := installer.Chronos.Job.New(&pkg.Chronos); !ok {
+			return err
+		}
+	}
 
-// CmdConfig holds the needed config of the command
-type CmdConfig struct {
-	Chronos   string
-	Listen    string
-	Logger    *log.Logger
-	Marathon  string
-	Mesos     string
-	Verbose   bool
-	Zookeeper string
-	Etcd      etcd.Provider
+	return nil
 }

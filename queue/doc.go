@@ -12,7 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package install
-
-// workQueue is buffered channel that we can send work requests on.
-var workQueue = make(chan WorkRequest, 100)
+package queue

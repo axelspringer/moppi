@@ -15,40 +15,31 @@
 package etcd
 
 import (
-	"github.com/axelspringer/moppi/pkg"
 	"github.com/axelspringer/moppi/provider"
-	"github.com/axelspringer/moppi/provider/kv"
 	"github.com/docker/libkv/store"
 	"github.com/docker/libkv/store/etcd"
 )
 
 var _ provider.Provider = (*Provider)(nil)
 
-// Provider holds configurations of the provider.
-type Provider struct {
-	kv.Provider
-}
-
-// New creates a new etcd provider
-func New(bucket string) error {
-	return mustNew(&bucket)
-}
-
-// mustNew wraps the creation of a new etcd provider
-func mustNew(bucket *string) error {
-	p := new(Provider)
-	store, err := p.CreateStore(*bucket)
-	if err != nil {
-		return err
-	}
-	p.SetKVClient(store)
-
-	return nil
-}
-
 // Package gets a package from etcd
-func (p *Provider) Package(name string, version int) (*pkg.Package, error) {
-	return p.Provider.Package(name, version)
+func (p *Provider) Package(req *provider.Request) (*provider.Package, error) {
+	return p.Provider.Package(req)
+}
+
+// Version gets the meta version of the moppi repo
+func (p *Provider) Version() (*store.KVPair, error) {
+	return p.Provider.Version()
+}
+
+// CheckVersion checks the meta version of the moppi repo
+func (p *Provider) CheckVersion(moppiVersion string) (bool, error) {
+	version, err := p.Version()
+	if err != nil {
+		return false, err
+	}
+	// TODO: real error
+	return string(version.Value) == moppiVersion, nil
 }
 
 // CreateStore creates the etcd store

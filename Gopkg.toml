@@ -31,3 +31,7 @@
 [[constraint]]
   name = "github.com/jonboulle/clockwork"
   version = "0.1.0"
+
+[[constraint]]
+  name = "gopkg.in/alecthomas/kingpin.v2"
+  version = "2.2.5"

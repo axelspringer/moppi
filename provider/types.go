@@ -14,10 +14,54 @@
 
 package provider
 
-import "github.com/axelspringer/moppi/pkg"
+import (
+	"github.com/axelspringer/go-chronos"
+	"github.com/docker/libkv/store"
+	"github.com/gambol99/go-marathon"
+)
 
 // Provider defines the interface to a Provider (e.g. etcd)
 type Provider interface {
-	Package(name string, version int) (*pkg.Package, error)
+	Version() (*store.KVPair, error)
+	Universes()
+	Package(req *Request) (*Package, error)
 	// Packages() (map[string]map[int]*install.Package, error)
+}
+
+// AbstractProvider is the base provider from which every provider inherits
+type AbstractProvider struct {
+	Enable bool
+}
+
+// RequestConfig describes a passed in config for installer Request
+type RequestConfig struct {
+}
+
+// Request describes an request to the installer
+type Request struct {
+	Name     string        `json:"name"`
+	Universe string        `json:"universe"`
+	Revision string        `json:"revision"`
+	Config   RequestConfig `json:"config"`
+}
+
+type Package struct {
+	Version   string `json:"version"`
+	Chronos   chronos.Job
+	Marathon  marathon.Application
+	Install   Install
+	Uninstall Uninstall
+}
+
+// Install describes an installment (contained in install.json)
+type Install struct {
+	Marathon bool `json:"marathon"`
+	Chronos  bool `json:"chronos"`
+	Update   bool `json:"update"`
+}
+
+// Uninstall describes an uninstallment
+type Uninstall struct {
+	Marathon bool `json:"marathon"`
+	Chronos  bool `json:"chronos"`
 }

@@ -12,4 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package install
+package provider
+
+const (
+	MoppiMetaVersion = "/meta/version"
+	MoppiUniverses   = "/universes"
+	MoppiPackages    = "/packages"
+	MoppiPackage     = "/package"
+	MoppiMarathon    = "/marathon"
+	MoppiChronos     = "/chronos"
+	MoppiInstall     = "/install"
+	MoppiUninstall   = "/uninstall"
+)

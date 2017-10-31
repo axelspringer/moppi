@@ -37,7 +37,7 @@ All meta information about a universe must also be stored within.
 
 ```
 └── meta
-    ├── schema.json
+    ├── version.json
     └── ...
 ```
 

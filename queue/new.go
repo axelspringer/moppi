@@ -12,35 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package install
+package queue
 
 import "fmt"
 
-var (
-	workerQueue chan chan WorkRequest
-)
+// New is providing the Queue
+func New(workers int) WorkQueue {
+	return mustNew(workers)
+}
 
-// StartDispatcher is providing the WorkerQueue
-func StartDispatcher(workers int, installer *Installer) {
-	// First, initialize the channel we are going to but the workers' work channels into.
-	workerQueue = make(chan chan WorkRequest, workers)
+// mustNew wraps the creation of a new queue
+func mustNew(workers int) WorkQueue {
+	var queue Queue
+	queue.Worker = make(chan chan interface{}, workers)
+	queue.Work = make(chan interface{}, 100)
 
 	// Now, create all of our workers.
 	for i := 0; i < workers; i++ {
+		// TODO: remove or substitude
 		fmt.Println("Starting worker", i+1)
-		worker := NewWorker(i+1, workerQueue, installer)
+		worker := NewWorker(i+1, queue)
 		worker.Start()
 	}
 
 	go func() {
 		for {
 			select {
-			case work := <-workQueue:
+			case work := <-queue.Work:
 				go func() {
-					worker := <-workerQueue
+					worker := <-queue.Worker
 					worker <- work
 				}()
 			}
 		}
 	}()
+
+	return queue.Work
 }

@@ -1,8 +1,5 @@
 verbose: true
-universes:
-  dev:
-    etcd: 
-      prefix: "/moppi/dev"
-      endpoint: "internal-kombinat-prod-managers-693486814.eu-west-1.elb.amazonaws.com:2379"
+etcd:
+  prefix: "/moppi"
+  endpoint: "internal-kombinat-prod-managers-693486814.eu-west-1.elb.amazonaws.com:2379"
 chronos: "http://chronos.tortuga.services/"
-marathon: "https://marathon.tortuga.services/"

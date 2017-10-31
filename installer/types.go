@@ -12,17 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package install
+package installer
 
-import "encoding/json"
+import (
+	chronos "github.com/axelspringer/go-chronos"
+	"github.com/axelspringer/moppi/mesos"
+	marathon "github.com/gambol99/go-marathon"
+	log "github.com/sirupsen/logrus"
+)
 
-// NewRequest parses the request body to a Request
-func NewRequest(data []byte) (req *Request, err error) {
-	req = &Request{}
-
-	if len(data) > 0 {
-		err = json.Unmarshal(data, &req)
-	}
-
-	return req, err
+// Installer describes an installer
+type Installer struct {
+	Chronos  *chronos.Client
+	Log      *log.Logger
+	Marathon marathon.Marathon
+	Mesos    *mesos.Mesos
 }

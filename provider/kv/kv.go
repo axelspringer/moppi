@@ -15,23 +15,19 @@
 package kv
 
 import (
-	"github.com/axelspringer/moppi/pkg"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
+
 	"github.com/axelspringer/moppi/provider"
 	"github.com/docker/libkv"
 	"github.com/docker/libkv/store"
+	"github.com/prometheus/common/log"
 )
-
-// Provider holds common configurations of key-value providers.
-type Provider struct {
-	provider.Provider
-	Endpoint  []string
-	Prefix    string
-	TLS       *ClientTLS
-	Username  string
-	Password  string
-	storeType store.Backend
-	kvClient  store.Store
-}
 
 // SetStoreType storeType setter, inherit from libkv
 func (p *Provider) SetStoreType(storeType store.Backend) {
@@ -43,14 +39,75 @@ func (p *Provider) SetKVClient(kvClient store.Store) {
 	p.kvClient = kvClient
 }
 
-// Package return a package
-func (p *Provider) Package(name string, version int) (*pkg.Package, error) {
-	return &pkg.Package{}, nil
+// Version returns the version of the universe
+func (p *Provider) Version() (*store.KVPair, error) {
+	ver, err := p.kvClient.Get(p.Prefix + provider.MoppiMetaVersion)
+	return ver, err
 }
 
-// Packages returns all available packages
-func (p *Provider) Packages() ([]*pkg.Package, error) {
-	return []*pkg.Package{}, nil
+// Package return a package
+func (p *Provider) Package(req *provider.Request) (*provider.Package, error) {
+	pkg := &provider.Package{}
+	path := p.Prefix + provider.MoppiUniverses + "/" + req.Universe + provider.MoppiPackages + "/" + req.Name + "/" + req.Revision
+
+	fmt.Println(path + provider.MoppiPackage)
+
+	// info
+	kvInfo, err := p.kvClient.Get(path + provider.MoppiPackage)
+	if err != nil {
+		return pkg, err
+	}
+	err = json.Unmarshal(kvInfo.Value, &pkg)
+	if err != nil {
+		return pkg, err
+	}
+
+	// read install
+	kvInstall, err := p.kvClient.Get(path + provider.MoppiInstall)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(kvInstall.Value, &pkg.Install)
+	if err != nil {
+		return nil, err
+	}
+
+	// read uninstall
+	kvUninstall, err := p.kvClient.Get(path + provider.MoppiUninstall)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(kvUninstall.Value, &pkg.Uninstall)
+	if err != nil {
+		return nil, err
+	}
+
+	// read chronos
+	kvChronos, err := p.kvClient.Get(path + provider.MoppiChronos)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(kvChronos.Value, &pkg.Chronos)
+	if err != nil {
+		return nil, err
+	}
+
+	// read marathon
+	kvMarathon, err := p.kvClient.Get(path + provider.MoppiMarathon)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(kvMarathon.Value, &pkg.Marathon)
+	if err != nil {
+		return nil, err
+	}
+
+	return pkg, nil
+}
+
+// Universes return all available universes
+func (p *Provider) Universes() {
+	return
 }
 
 // CreateStore creates the K/V store
@@ -72,9 +129,68 @@ func (p *Provider) CreateStore(bucket string) (store.Store, error) {
 
 	return libkv.NewStore(
 		p.storeType,
-		p.Endpoint,
+		strings.Split(p.Endpoint, ","),
 		storeConfig,
 	)
+}
+
+// CreateTLSConfig creates a TLS config from ClientTLS structures
+func (clientTLS *ClientTLS) CreateTLSConfig() (*tls.Config, error) {
+	var err error
+	if clientTLS == nil {
+		log.Warnf("clientTLS is nil")
+		return nil, nil
+	}
+	caPool := x509.NewCertPool()
+	if clientTLS.CA != "" {
+		var ca []byte
+		if _, errCA := os.Stat(clientTLS.CA); errCA == nil {
+			ca, err = ioutil.ReadFile(clientTLS.CA)
+			if err != nil {
+				return nil, fmt.Errorf("Failed to read CA. %s", err)
+			}
+		} else {
+			ca = []byte(clientTLS.CA)
+		}
+		caPool.AppendCertsFromPEM(ca)
+	}
+
+	cert := tls.Certificate{}
+	_, errKeyIsFile := os.Stat(clientTLS.Key)
+
+	if !clientTLS.InsecureSkipVerify && (len(clientTLS.Cert) == 0 || len(clientTLS.Key) == 0) {
+		return nil, fmt.Errorf("TLS Certificate or Key file must be set when TLS configuration is created")
+	}
+
+	if len(clientTLS.Cert) > 0 && len(clientTLS.Key) > 0 {
+		if _, errCertIsFile := os.Stat(clientTLS.Cert); errCertIsFile == nil {
+			if errKeyIsFile == nil {
+				cert, err = tls.LoadX509KeyPair(clientTLS.Cert, clientTLS.Key)
+				if err != nil {
+					return nil, fmt.Errorf("Failed to load TLS keypair: %v", err)
+				}
+			} else {
+				return nil, fmt.Errorf("tls cert is a file, but tls key is not")
+			}
+		} else {
+			if errKeyIsFile != nil {
+				cert, err = tls.X509KeyPair([]byte(clientTLS.Cert), []byte(clientTLS.Key))
+				if err != nil {
+					return nil, fmt.Errorf("Failed to load TLS keypair: %v", err)
+
+				}
+			} else {
+				return nil, fmt.Errorf("tls key is a file, but tls cert is not")
+			}
+		}
+	}
+
+	TLSConfig := &tls.Config{
+		Certificates:       []tls.Certificate{cert},
+		RootCAs:            caPool,
+		InsecureSkipVerify: clientTLS.InsecureSkipVerify,
+	}
+	return TLSConfig, nil
 }
 
 // Provide provides the configuration to fernmelder via the configuration channel

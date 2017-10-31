@@ -20,7 +20,8 @@ import (
 	"os"
 
 	"github.com/axelspringer/moppi/cfg"
-	"github.com/axelspringer/moppi/install"
+	"github.com/axelspringer/moppi/installer"
+	"github.com/axelspringer/moppi/queue"
 
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/web"
@@ -33,19 +34,22 @@ func New(config *cfg.Config) (*Server, error) {
 
 // mustNew wraps the creation of a new Server
 func mustNew(config *cfg.Config) (*Server, error) {
-	signals := make(chan os.Signal, 1)
-
-	installer, err := install.New(config)
+	installer, err := installer.New(config)
 	if err != nil {
 		return nil, err
 	}
 
+	queue := queue.New(1)
+	signals := make(chan os.Signal, 1)
+
 	// server config
 	server := &Server{
-		cfg:       config,
-		log:       config.Logger,
+		listener:  config.Listener,
 		installer: installer,
+		log:       config.Logger,
 		signals:   signals,
+		provider:  config.Etcd,
+		queue:     queue,
 	}
 
 	return server, nil
@@ -70,17 +74,20 @@ func (server *Server) allUniverses(c web.C, w http.ResponseWriter, _ *http.Reque
 func (server *Server) installPackage(w http.ResponseWriter, req *http.Request) {
 	req.Header.Add("Accept", "application/json")
 
-	pkgRequest, err := parseRequest(req.Body)
+	packageRequest, err := parseRequest(req.Body)
 	if err != nil {
 		writeErrorJSON(w, "Could not parse the package request", 400, err)
 		return
 	}
 
-	err = server.installer.Request(pkgRequest)
+	pkg, err := server.provider.Package(packageRequest)
 	if err != nil {
-		writeErrorJSON(w, "Could not fullfill the package request", 400, err)
+		writeErrorJSON(w, "Could not parse the package request", 400, err)
 		return
 	}
+
+	// queue installment
+	server.queue <- &queue.Install{pkg, server.installer}
 
 	w.WriteHeader(201)
 }
@@ -89,13 +96,23 @@ func (server *Server) installPackage(w http.ResponseWriter, req *http.Request) {
 func (server *Server) uninstallPackage(w http.ResponseWriter, req *http.Request) {
 	req.Header.Add("Accept", "application/json")
 
-	_, err := parseRequest(req.Body)
-	if err != nil {
-		writeErrorJSON(w, "Could not parse the package request", 400, err)
-		return
-	}
+	// _, err := parseRequest(req.Body)
+	// if err != nil {
+	// 	writeErrorJSON(w, "Could not parse the package request", 400, err)
+	// 	return
+	// }
 
 	w.WriteHeader(204)
+}
+
+// version returns the version of the repository
+func (server *Server) version(w http.ResponseWriter, req *http.Request) {
+	version, err := server.provider.Version()
+	if err != nil {
+		w.WriteHeader(400)
+		return
+	}
+	io.WriteString(w, string(version.Value))
 }
 
 // Start is starting to serve the api
@@ -108,12 +125,13 @@ func (server *Server) Start() {
 	goji.Get("/ping", server.ping)
 	goji.Get("/health", server.health)
 	goji.Get("/universes", server.allUniverses)
+	goji.Get("/version", server.version)
 
 	goji.Post("/install", server.installPackage)
 	goji.Post("/uninstall", server.uninstallPackage)
 
 	// create server
-	goji.ServeListener(server.cfg.Listener)
+	goji.ServeListener(server.listener)
 }
 
 // Stop is stoping to serve the api

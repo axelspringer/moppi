@@ -14,27 +14,6 @@
 
 package cfg
 
-import (
-	"net"
-
-	"github.com/axelspringer/moppi/provider/etcd"
-	log "github.com/sirupsen/logrus"
+const (
+	DefaultBucket = "moppi"
 )
-
-// Config holds the persistent config of Moppi
-type Config struct {
-	CmdConfig
-	Listener net.Listener
-}
-
-// CmdConfig holds the needed config of the command
-type CmdConfig struct {
-	Chronos   string
-	Listen    string
-	Logger    *log.Logger
-	Marathon  string
-	Mesos     string
-	Verbose   bool
-	Zookeeper string
-	Etcd      etcd.Provider
-}

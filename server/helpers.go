@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/axelspringer/moppi/install"
+	"github.com/axelspringer/moppi/provider"
 )
 
 // writeJson emits a success and writes the JSON
@@ -45,25 +45,44 @@ func writeErrorJSON(w http.ResponseWriter, msg string, status int, err error) {
 	writeJSON(w, &Error{msg, err.Error()})
 }
 
-// parseRequest parses a package request to Request
-func parseRequest(r io.Reader) (*install.Request, error) {
+// readRequest reads in a request
+func readRequest(r io.Reader) ([]byte, error) {
 	body, err := ioutil.ReadAll(r)
 	if err != nil {
 		// here we should log request
 		return nil, err
 	}
 
-	req, err := install.NewRequest(body)
+	return body, nil
+}
+
+// parseInstallRequest parses an request to install a package
+func parseRequest(r io.Reader) (*provider.Request, error) {
+	req := &provider.Request{}
+
+	data, err := readRequest(r)
 	if err != nil {
-		return nil, err
+		return req, err
 	}
 
-	if req.Name == "" {
-		return nil, PackageRequestFieldMissing("Name")
+	if len(data) > 0 {
+		err = json.Unmarshal(data, &req)
 	}
 
 	return req, err
 }
+
+// 	req, err := install.NewRequest(body)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	if req.Name == "" {
+// 		return nil, PackageRequestFieldMissing("Name")
+// 	}
+
+// 	return req, err
+// }
 
 // getHostname returns the hostname
 func getHostname() (hostname string, err error) {

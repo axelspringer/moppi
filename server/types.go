@@ -15,20 +15,24 @@
 package server
 
 import (
+	"net"
 	"os"
 
-	"github.com/axelspringer/moppi/cfg"
-	"github.com/axelspringer/moppi/install"
+	"github.com/axelspringer/moppi/installer"
 
+	"github.com/axelspringer/moppi/provider/etcd"
+	"github.com/axelspringer/moppi/queue"
 	log "github.com/sirupsen/logrus"
 )
 
 // Server holds the state of a new Server
 type Server struct {
-	cfg       *cfg.Config
 	log       *log.Logger
 	signals   chan os.Signal
-	installer *install.Installer
+	installer *installer.Installer
+	listener  net.Listener
+	provider  etcd.Provider
+	queue     queue.WorkQueue
 }
 
 // Error contains an error of the api

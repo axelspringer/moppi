@@ -12,24 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package install
+package queue
 
-import (
-	"log"
-	"time"
-)
+import "fmt"
+import "reflect"
 
 // NewWorker creates, and returns a new Worker object. Its only argument
 // is a channel that the worker can add itself to whenever it is done its
 // work.
-func NewWorker(id int, workerQueue chan chan WorkRequest, installer *Installer) Worker {
+func NewWorker(id int, queue Queue) Worker {
 	// Create, and return the worker.
 	worker := Worker{
-		ID:          id,
-		Work:        make(chan WorkRequest),
-		WorkerQueue: workerQueue,
-		Installer:   installer,
-		QuitChan:    make(chan bool)}
+		ID:       id,
+		Work:     queue.Work,
+		Worker:   queue.Worker,
+		QuitChan: make(chan bool)}
 
 	return worker
 }
@@ -39,28 +36,20 @@ func (w *Worker) Start() {
 	go func() {
 		for {
 			// Add ourselves into the worker queue.
-			w.WorkerQueue <- w.Work
+			w.Worker <- w.Work
 
 			select {
 			case work := <-w.Work:
-				time.Sleep(work.Delay)
-
-				// deploy marathon
-				if work.Install.Marathon {
-					if _, err := w.Installer.marathon.CreateApplication(&work.Marathon); err != nil {
-						log.Printf("Failed to create application: %s, error: %s", work.Marathon.ID, err)
-					} else {
-						log.Printf("Created the application: %s", work.Marathon.ID)
+				switch work.(type) {
+				case *Install:
+					// TODO: error handling
+					err := install(work.(*Install))
+					if err != nil {
+						fmt.Println(err)
 					}
-				}
-
-				// deploy chronos
-				if work.Install.Chronos {
-					if ok, _, _ := w.Installer.chronos.Job.New(&work.Chronos); !ok {
-						log.Printf("Failed to create job: %s, error: %s", work.Chronos.Name)
-					} else {
-						log.Printf("Created the application: %s", work.Chronos.Name)
-					}
+				default:
+					fmt.Println(reflect.TypeOf(work))
+					break
 				}
 
 			case <-w.QuitChan:

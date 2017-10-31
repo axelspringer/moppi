@@ -12,29 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cfg
+package etcd
 
-import (
-	"net"
+import "github.com/axelspringer/moppi/provider/kv"
 
-	"github.com/axelspringer/moppi/provider/etcd"
-	log "github.com/sirupsen/logrus"
-)
-
-// Config holds the persistent config of Moppi
-type Config struct {
-	CmdConfig
-	Listener net.Listener
-}
-
-// CmdConfig holds the needed config of the command
-type CmdConfig struct {
-	Chronos   string
-	Listen    string
-	Logger    *log.Logger
-	Marathon  string
-	Mesos     string
-	Verbose   bool
-	Zookeeper string
-	Etcd      etcd.Provider
+// Provider holds configurations of the provider.
+type Provider struct {
+	kv.Provider `mapstructure:",squash" export:"true"`
 }
