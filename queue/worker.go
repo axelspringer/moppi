@@ -15,7 +15,6 @@
 package queue
 
 import "fmt"
-import "reflect"
 
 // NewWorker creates, and returns a new Worker object. Its only argument
 // is a channel that the worker can add itself to whenever it is done its
@@ -24,7 +23,7 @@ func NewWorker(id int, queue Queue) Worker {
 	// Create, and return the worker.
 	worker := Worker{
 		ID:       id,
-		Work:     queue.Work,
+		Work:     make(WorkQueue),
 		Worker:   queue.Worker,
 		QuitChan: make(chan bool)}
 
@@ -48,10 +47,8 @@ func (w *Worker) Start() {
 						fmt.Println(err)
 					}
 				default:
-					fmt.Println(reflect.TypeOf(work))
 					break
 				}
-
 			case <-w.QuitChan:
 				return
 			}

@@ -50,8 +50,6 @@ func (p *Provider) Package(req *provider.Request) (*provider.Package, error) {
 	pkg := &provider.Package{}
 	path := p.Prefix + provider.MoppiUniverses + "/" + req.Universe + provider.MoppiPackages + "/" + req.Name + "/" + req.Revision
 
-	fmt.Println(path + provider.MoppiPackage)
-
 	// info
 	kvInfo, err := p.kvClient.Get(path + provider.MoppiPackage)
 	if err != nil {

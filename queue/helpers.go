@@ -14,6 +14,8 @@
 
 package queue
 
+import "time"
+
 func install(i *Install) error {
 	installer := i.Installer
 	pkg := i.Package
@@ -21,6 +23,10 @@ func install(i *Install) error {
 	// deploy marathon
 	if pkg.Install.Marathon {
 		if _, err := installer.Marathon.CreateApplication(&pkg.Marathon); err != nil {
+			return err
+		}
+
+		if err := installer.Marathon.WaitOnApplication(pkg.Marathon.ID, 10*time.Second); err != nil {
 			return err
 		}
 	}
