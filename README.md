@@ -66,10 +66,10 @@ When using [Chronos](https://github.com/mesos/chronos) to run scheduled task, yo
 
 ## Examples
 
-Make an install request with the `example/data.json`.
+You find the example data in `examples/`. etcd import is a s simple as `PUT`ing the relevant JSON in the KV.
 
-```json
-curl -d "@install.json" -X POST http://localhost:8080/install
+```bash
+curl http://127.0.0.1:2379/v2/keys/moppi/universes/dev/packages/example/1/uninstall -XPUT -d value="$(cat marathon.json)"
 ```
 
 ## Getting Started

@@ -87,7 +87,7 @@ func (server *Server) installPackage(w http.ResponseWriter, req *http.Request) {
 	}
 
 	// queue installment
-	server.queue <- &queue.Install{pkg, server.installer}
+	server.queue <- &queue.Install{Package: pkg, Installer: server.installer}
 
 	w.WriteHeader(201)
 }
