@@ -1,31 +1,24 @@
 language: go
-
 branches:
   only:
-    - master
-
+  - master
 cache:
   directories:
-    - $GOPATH/src
-    - $GOPATH/pkg
-
+  - "$GOPATH/src"
+  - "$GOPATH/pkg"
 install:
 - make deps
 - make restore
-- export CI=TRAVIS # for gotest to force colors
-
+- export CI=TRAVIS
 deploy:
   provider: releases
-  api-key: "GITHUB OAUTH TOKEN"
-  file_glob: true
+  api_key:
+    secure: Q01VrSZlYXYzB2y7gngLbjL5fAQ/dNc/LC7JMtgkub5xhfFXt1O/F2uM5jJ9dzx8yUrCtmi/xLGPSG+GJoyLOqGi6zPyfR7ILaTI77GMOoGS/oseMF/VGazYIZs13KbdWaHQ2K9ACM9OLVLIRkQ+0417BbB8Ltr+ufQ+bmEShoM+8a85g16MNq+2mXafdmaArczpcqJMCTakJS9HTMK6BX8qckQ17/ppjrke9WTjJht5uUGa/XZNi1+Usdg8zf2XzS9QkDn9p3VjE/yarZgP24BLXoScYPIbng+K0DID4Ex6DemCz4hk8io96ifetkHFNLjTZee2oPTPgUUbWhCHpKwtaxKAklhSPKnZXlw71d0vJgvCF/DC7eRmAtvUAcI1LASDwHe12jhe4pK7o3LsExsVyhOXJqy5crtZIZZd26dd18lrPIdE6mgXlg0vgoyKJpRgQtKRqg5V5EWpFca/c6OJAOF29g6SwJS9HqZy9hIOYd1HwWume+MNeiUci9C89WVvNSerQC8g1QtJuHcoXZH02OgsRo6SN/b0+ntquu0yrbNSAofcXUAVV0Rirffu0A9Od7zwJHMACQztW3K8VerLBNdiG6wNV7myH2TDmXHIbv8gh1SFs/7xVEx1KO2RToQgNbU4KKWl7yzk0aR7LlPsTXyLzPJFZczf7SxEc6g=
   file: bin/*
-  skip_cleanup: true
   on:
-    tags: true
-
-go: 
-  - 1.8
-  - 1.9
-
+    repo: axelspringer/moppi
+go:
+- 1.8
+- 1.9
 script:
-  - make ci
+- make ci
