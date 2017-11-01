@@ -1,5 +1,5 @@
 verbose: true
 etcd:
   prefix: "/moppi"
-  endpoint: "internal-kombinat-prod-managers-693486814.eu-west-1.elb.amazonaws.com:2379"
-chronos: "http://chronos.tortuga.services/"
+  endpoint: "localhost:2379"
+chronos: "http://localhost:8080"
