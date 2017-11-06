@@ -22,19 +22,23 @@ func install(i *Install) error {
 
 	// deploy marathon
 	if pkg.Install.Marathon {
-		if _, err := installer.Marathon.CreateApplication(&pkg.Marathon); err != nil {
-			return err
-		}
+		for _, marathon := range pkg.Marathon {
+			if _, err := installer.Marathon.CreateApplication(&marathon); err != nil {
+				return err
+			}
 
-		if err := installer.Marathon.WaitOnApplication(pkg.Marathon.ID, 10*time.Second); err != nil {
-			return err
+			if err := installer.Marathon.WaitOnApplication(marathon.ID, 10*time.Second); err != nil {
+				return err
+			}
 		}
 	}
 
 	// deploy chronos
 	if pkg.Install.Chronos {
-		if ok, _, err := installer.Chronos.Job.New(&pkg.Chronos); !ok {
-			return err
+		for _, chronos := range pkg.Chronos {
+			if ok, _, err := installer.Chronos.Job.New(&chronos); !ok {
+				return err
+			}
 		}
 	}
 

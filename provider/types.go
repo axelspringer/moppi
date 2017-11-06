@@ -47,8 +47,8 @@ type Request struct {
 
 type Package struct {
 	Version   string `json:"version"`
-	Chronos   chronos.Job
-	Marathon  marathon.Application
+	Chronos   []chronos.Job
+	Marathon  []marathon.Application
 	Install   Install
 	Uninstall Uninstall
 }
