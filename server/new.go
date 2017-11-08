@@ -19,10 +19,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/zenazn/goji/web/middleware"
+
 	"github.com/axelspringer/moppi/cfg"
 	"github.com/axelspringer/moppi/installer"
 	"github.com/axelspringer/moppi/queue"
-
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/web"
 )
@@ -62,11 +63,6 @@ func (server *Server) ping(c web.C, w http.ResponseWriter, _ *http.Request) {
 
 // health returns health infos about the api
 func (server *Server) health(c web.C, w http.ResponseWriter, _ *http.Request) {
-	return
-}
-
-// universes returns the current configured universes
-func (server *Server) allUniverses(c web.C, w http.ResponseWriter, _ *http.Request) {
 	return
 }
 
@@ -121,14 +117,23 @@ func (server *Server) Start() {
 	server.configSignals()
 	go server.watchSignals()
 
-	// setup routes
+	// status
 	goji.Get("/ping", server.ping)
 	goji.Get("/health", server.health)
-	goji.Get("/universes", server.allUniverses)
 	goji.Get("/version", server.version)
 
+	// triggers
 	goji.Post("/install", server.installPackage)
 	goji.Post("/uninstall", server.uninstallPackage)
+
+	// meta
+	meta := web.New()
+	goji.Handle("/meta/*", meta)
+	meta.Use(middleware.SubRouter)
+	meta.Get("/universes", server.allUniverses)
+
+	// redirects
+	goji.Get("/meta", http.RedirectHandler("/meta/", 301))
 
 	// create server
 	goji.ServeListener(server.listener)

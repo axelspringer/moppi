@@ -32,6 +32,11 @@ func (p *Provider) Version() (*store.KVPair, error) {
 	return p.Provider.Version()
 }
 
+// Universes gets all the known universes
+func (p *Provider) Universes() (*provider.Universes, error) {
+	return p.Provider.Universes()
+}
+
 // CheckVersion checks the meta version of the moppi repo
 func (p *Provider) CheckVersion(moppiVersion string) (bool, error) {
 	version, err := p.Version()

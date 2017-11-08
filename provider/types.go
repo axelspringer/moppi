@@ -23,7 +23,7 @@ import (
 // Provider defines the interface to a Provider (e.g. etcd)
 type Provider interface {
 	Version() (*store.KVPair, error)
-	Universes()
+	Universes() (*Universes, error)
 	Package(req *Request) (*Package, error)
 	// Packages() (map[string]map[int]*install.Package, error)
 }
@@ -45,6 +45,7 @@ type Request struct {
 	Config   RequestConfig `json:"config"`
 }
 
+// Package describes a package in the universe
 type Package struct {
 	Version   string `json:"version"`
 	Chronos   []chronos.Job
@@ -65,3 +66,6 @@ type Uninstall struct {
 	Marathon bool `json:"marathon"`
 	Chronos  bool `json:"chronos"`
 }
+
+// Universes describes known universes
+type Universes []string

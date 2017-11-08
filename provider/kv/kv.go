@@ -104,8 +104,20 @@ func (p *Provider) Package(req *provider.Request) (*provider.Package, error) {
 }
 
 // Universes return all available universes
-func (p *Provider) Universes() {
-	return
+func (p *Provider) Universes() (*provider.Universes, error) {
+	universes := make(provider.Universes, 0)
+	path := p.Prefix + provider.MoppiUniverses + "/"
+
+	// could this be refactored
+	kvUniverses, err := p.kvClient.List(path)
+	if err != nil {
+		return nil, err
+	}
+	for _, universe := range kvUniverses {
+		universes = append(universes, universe.Key) // return full key to universes
+	}
+
+	return &universes, nil
 }
 
 // CreateStore creates the K/V store
