@@ -24,7 +24,9 @@ import (
 type Provider interface {
 	Version() (*store.KVPair, error)
 	Universes() (*Universes, error)
+	Revisions(req *Request) (*PackageRevisions, error)
 	Package(req *Request) (*Package, error)
+	Packages(req *Request) (*Packages, error)
 	// Packages() (map[string]map[int]*install.Package, error)
 }
 
@@ -69,3 +71,9 @@ type Uninstall struct {
 
 // Universes describes known universes
 type Universes []string
+
+// Packages describes the known packages in a universe
+type Packages []string
+
+// PackageRevisions describes known package revisions
+type PackageRevisions []string

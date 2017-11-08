@@ -27,6 +27,16 @@ func (p *Provider) Package(req *provider.Request) (*provider.Package, error) {
 	return p.Provider.Package(req)
 }
 
+// Packages gets all the packages from a universe in the etcd
+func (p *Provider) Packages(req *provider.Request) (*provider.Packages, error) {
+	return p.Provider.Packages(req)
+}
+
+// Revisions gets all the packages revisions from a universe
+func (p *Provider) Revisions(req *provider.Request) (*provider.PackageRevisions, error) {
+	return p.Provider.Revisions(req)
+}
+
 // Version gets the meta version of the moppi repo
 func (p *Provider) Version() (*store.KVPair, error) {
 	return p.Provider.Version()

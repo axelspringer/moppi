@@ -130,10 +130,12 @@ func (server *Server) Start() {
 	meta := web.New()
 	goji.Handle("/meta/*", meta)
 	meta.Use(middleware.SubRouter)
-	meta.Get("/universes", server.allUniverses)
+	meta.Get("/universes", server.metaUniverses)
+	meta.Get("/universes/:universe", server.metaUniversesPkgs)
+	meta.Get("/universes/:universe/:name", server.metaUniversePkgRevisions)
 
 	// redirects
-	goji.Get("/meta", http.RedirectHandler("/meta/", 301))
+	goji.Get("/meta", http.RedirectHandler("/meta/", 301)) // could be in the middleware
 
 	// create server
 	goji.ServeListener(server.listener)
