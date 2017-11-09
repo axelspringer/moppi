@@ -126,16 +126,14 @@ func (server *Server) Start() {
 	goji.Post("/install", server.installPackage)
 	goji.Post("/uninstall", server.uninstallPackage)
 
-	// meta
-	meta := web.New()
-	goji.Handle("/meta/*", meta)
-	meta.Use(middleware.SubRouter)
-	meta.Get("/universes", server.metaUniverses)
-	meta.Get("/universes/:universe", server.metaUniversesPkgs)
-	meta.Get("/universes/:universe/:name", server.metaUniversePkgRevisions)
-
-	// redirects
-	goji.Get("/meta", http.RedirectHandler("/meta/", 301)) // could be in the middleware
+	// universes
+	universes := web.New()
+	goji.Handle("/universes/*", universes)
+	universes.Use(middleware.SubRouter)
+	universes.Handle("/", server.universesList)
+	universes.Handle("/:universe/meta", server.getUniverse)
+	universes.Get("/:universe/packages", server.universesPkgs)
+	universes.Get("/:universe/packages/:name", server.pkgRevisions)
 
 	// create server
 	goji.ServeListener(server.listener)

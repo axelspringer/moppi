@@ -13,23 +13,3 @@
 // limitations under the License.
 
 package provider
-
-import "strings"
-
-// LeadingSlash is adding a slash to the beginning
-func LeadingSlash(s string) string {
-	prefix := "/"
-	if !strings.HasPrefix(s, prefix) {
-		return prefix + s
-	}
-	return s
-}
-
-// TrailingSlash is adding a slash at the end
-func TrailingSlash(s string) string {
-	suffix := "/"
-	if !strings.HasSuffix(s, suffix) {
-		return s + suffix
-	}
-	return s
-}

@@ -42,6 +42,11 @@ func (p *Provider) Version() (*store.KVPair, error) {
 	return p.Provider.Version()
 }
 
+// Universe gets the meta info of a universe
+func (p *Provider) Universe(req *provider.Request) (*provider.Universe, error) {
+	return p.Provider.Universe(req)
+}
+
 // Universes gets all the known universes
 func (p *Provider) Universes() (*provider.Universes, error) {
 	return p.Provider.Universes()

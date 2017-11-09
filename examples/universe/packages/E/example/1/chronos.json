@@ -7,8 +7,8 @@
       "image": "alpine:3.6",
       "network": "USER"
     },
-    "cpus": "0.1",
-    "mem": "64",
+    "cpus": 0.1,
+    "mem": 64,
     "fetch": [],
     "command": "echo 'Test'"
 }

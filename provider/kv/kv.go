@@ -106,8 +106,8 @@ func (p *Provider) Package(req *provider.Request) (*provider.Package, error) {
 // Packages returns all the packages in a universe
 func (p *Provider) Packages(req *provider.Request) (*provider.Packages, error) {
 	pkgs := make(provider.Packages, 0)
-	path := p.Prefix + provider.MoppiUniverses + provider.LeadingSlash(req.Universe) + provider.MoppiPackages
-	path = provider.TrailingSlash(path)
+	path := p.Prefix + provider.MoppiUniverses + leadingSlash(req.Universe) + provider.MoppiPackages
+	path = trailingSlash(path)
 
 	// could this be refactored?
 	kvPackages, err := p.kvClient.List(path)
@@ -125,8 +125,8 @@ func (p *Provider) Packages(req *provider.Request) (*provider.Packages, error) {
 // Revisions returns all the revisions of a package in a univers
 func (p *Provider) Revisions(req *provider.Request) (*provider.PackageRevisions, error) {
 	revs := make(provider.PackageRevisions, 0)
-	path := p.Prefix + provider.MoppiUniverses + provider.LeadingSlash(req.Universe) + provider.MoppiPackages + provider.LeadingSlash(req.Name)
-	path = provider.TrailingSlash(path)
+	path := p.Prefix + provider.MoppiUniverses + leadingSlash(req.Universe) + provider.MoppiPackages + leadingSlash(req.Name)
+	path = trailingSlash(path)
 
 	// could this be refactored?
 	kvRevisions, err := p.kvClient.List(path)
@@ -145,18 +145,30 @@ func (p *Provider) Revisions(req *provider.Request) (*provider.PackageRevisions,
 func (p *Provider) Universes() (*provider.Universes, error) {
 	universes := make(provider.Universes, 0)
 	path := p.Prefix + provider.MoppiUniverses
-	path = provider.TrailingSlash(path)
+	path = trailingSlash(path)
 
 	// could this be refactored?
-	kvUniverses, err := p.kvClient.List(path)
-	if err != nil {
-		return nil, err
-	}
-	for _, universe := range kvUniverses {
-		universes = append(universes, strings.TrimPrefix(universe.Key, path))
-	}
+	// kvUniverses, err := p.kvClient.List(path)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// for _, universe := range kvUniverses {
+	// 	universes = append(universes, strings.TrimPrefix(universe.Key, path))
+	// }
 
 	return &universes, nil
+}
+
+// Universe return the meta infos of a universe
+func (p *Provider) Universe(req *provider.Request) (*provider.Universe, error) {
+	path := universeMetaPath(p.Prefix, req.Universe)
+	var universe provider.Universe
+
+	if err := Transcode(&universe, path, p.kvClient); err != nil {
+		return &universe, err
+	}
+
+	return &universe, nil
 }
 
 // CreateStore creates the K/V store

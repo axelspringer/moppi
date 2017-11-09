@@ -23,11 +23,19 @@ import (
 // Provider defines the interface to a Provider (e.g. etcd)
 type Provider interface {
 	Version() (*store.KVPair, error)
+	Universe(req *Request) (*Universe, error)
 	Universes() (*Universes, error)
 	Revisions(req *Request) (*PackageRevisions, error)
 	Package(req *Request) (*Package, error)
 	Packages(req *Request) (*Packages, error)
 	// Packages() (map[string]map[int]*install.Package, error)
+}
+
+// Universe describes a universe from endpoint /meta
+type Universe struct {
+	Version     string `kvstructure:"version"`
+	Name        string `kvstructure:"name"`
+	Description string `kvstructure:"description"`
 }
 
 // AbstractProvider is the base provider from which every provider inherits
@@ -70,7 +78,7 @@ type Uninstall struct {
 }
 
 // Universes describes known universes
-type Universes []string
+type Universes []Universe
 
 // Packages describes the known packages in a universe
 type Packages []string

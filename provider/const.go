@@ -15,12 +15,13 @@
 package provider
 
 const (
-	MoppiMetaVersion = "/meta/version"
-	MoppiUniverses   = "/universes"
-	MoppiPackages    = "/packages"
-	MoppiPackage     = "/package"
-	MoppiMarathon    = "/marathon"
-	MoppiChronos     = "/chronos"
-	MoppiInstall     = "/install"
-	MoppiUninstall   = "/uninstall"
+	MoppiMetaVersion   = "/meta/version"
+	MoppiUniverses     = "/universes"
+	MoppiUniversesMeta = "/meta"
+	MoppiPackages      = "/packages"
+	MoppiPackage       = "/package"
+	MoppiMarathon      = "/marathon"
+	MoppiChronos       = "/chronos"
+	MoppiInstall       = "/install"
+	MoppiUninstall     = "/uninstall"
 )
