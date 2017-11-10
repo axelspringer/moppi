@@ -44,3 +44,8 @@ func install(i *Install) error {
 
 	return nil
 }
+
+func uninstall(i *Uninstall) error {
+
+	return nil
+}

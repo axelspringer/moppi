@@ -92,11 +92,20 @@ func (server *Server) installPackage(w http.ResponseWriter, req *http.Request) {
 func (server *Server) uninstallPackage(w http.ResponseWriter, req *http.Request) {
 	req.Header.Add("Accept", "application/json")
 
-	// _, err := parseRequest(req.Body)
-	// if err != nil {
-	// 	writeErrorJSON(w, "Could not parse the package request", 400, err)
-	// 	return
-	// }
+	packageRequest, err := parseRequest(req.Body)
+	if err != nil {
+		writeErrorJSON(w, "Could not parse the package request", 400, err)
+		return
+	}
+
+	pkg, err := server.provider.Package(packageRequest)
+	if err != nil {
+		writeErrorJSON(w, "Could not parse the package request", 400, err)
+		return
+	}
+
+	// queue installment
+	server.queue <- &queue.Uninstall{Package: pkg, Installer: server.installer}
 
 	w.WriteHeader(204)
 }

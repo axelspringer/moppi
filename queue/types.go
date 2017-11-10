@@ -45,5 +45,6 @@ type Install struct {
 
 // Uninstall describes an uninstallment
 type Uninstall struct {
-	Install
+	Package   *provider.Package
+	Installer *installer.Installer
 }

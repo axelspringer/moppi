@@ -29,12 +29,13 @@ func mustNew(workers int) WorkQueue {
 
 	// Now, create all of our workers.
 	for i := 0; i < workers; i++ {
-		// TODO: remove or substitude
+		// TODO: remove or subsitute
 		fmt.Println("Starting worker", i+1)
 		worker := NewWorker(i+1, queue)
 		worker.Start()
 	}
 
+	// Curate the work in a go routine
 	go func() {
 		for {
 			select {

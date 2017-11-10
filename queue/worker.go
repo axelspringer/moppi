@@ -46,6 +46,12 @@ func (w *Worker) Start() {
 					if err != nil {
 						fmt.Println(err)
 					}
+				case *Uninstall:
+					// TODO: error handling
+					err := uninstall(work.(*Uninstall))
+					if err != nil {
+						fmt.Println(err)
+					}
 				default:
 					break
 				}
