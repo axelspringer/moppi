@@ -97,17 +97,17 @@ func (p *Provider) Revisions(req *provider.Request) (*provider.PackageRevisions,
 // Universes return all available universes
 func (p *Provider) Universes() (*provider.Universes, error) {
 	universes := make(provider.Universes, 0)
-	path := p.Prefix + provider.MoppiUniverses
-	path = trailingSlash(path)
+	path := universesPath(p.Prefix)
 
 	// could this be refactored?
-	// kvUniverses, err := p.kvClient.List(path)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// for _, universe := range kvUniverses {
-	// 	universes = append(universes, strings.TrimPrefix(universe.Key, path))
-	// }
+	kvUniverses, err := p.kvClient.List(path)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, universe := range kvUniverses {
+		universes = append(universes, strings.TrimPrefix(universe.Key, path))
+	}
 
 	return &universes, nil
 }

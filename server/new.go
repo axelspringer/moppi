@@ -128,11 +128,11 @@ func (server *Server) Start() {
 
 	// universes
 	universes := web.New()
+	goji.Handle("/universes", server.getUniverses)
 	goji.Handle("/universes/*", universes)
 	universes.Use(middleware.SubRouter)
-	universes.Handle("/", server.universesList)
 	universes.Handle("/:universe/meta", server.getUniverse)
-	universes.Get("/:universe/packages", server.universesPkgs)
+	universes.Get("/:universe/packages", server.getPkgs)
 	universes.Get("/:universe/packages/:name", server.getPkgRevisions)
 	universes.Get("/:universe/packages/:name/:revision", server.getPkg)
 

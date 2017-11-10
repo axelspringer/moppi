@@ -46,10 +46,25 @@ func (server *Server) getPkgRevisions(c web.C, w http.ResponseWriter, _ *http.Re
 
 	revs, err := server.provider.Revisions(&pkgRequest)
 	if err != nil {
-		writeErrorJSON(w, "Could not retrieve packages", 400, err)
+		writeErrorJSON(w, "Could not retrieve revisions", 400, err)
 		return
 	}
 
 	writeJSON(w, revs)
+	return
+}
+
+// getPkgs returns all the packages in a universe
+func (server *Server) getPkgs(c web.C, w http.ResponseWriter, _ *http.Request) {
+	var pkgRequest provider.Request
+	pkgRequest.Universe = c.URLParams["universe"]
+
+	pkgs, err := server.provider.Packages(&pkgRequest)
+	if err != nil {
+		writeErrorJSON(w, "Could not retrieve packages", 400, err)
+		return
+	}
+
+	writeJSON(w, pkgs)
 	return
 }

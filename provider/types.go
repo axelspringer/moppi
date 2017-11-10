@@ -63,15 +63,6 @@ type Package struct {
 	Uninstall Uninstall              `kvstructure:"uninstall,json"`
 }
 
-// Package describes a package in the universe
-// type Package struct {
-// 	Version   string `json:"version"`
-// 	Chronos   []chronos.Job
-// 	Marathon  []marathon.Application
-// 	Install   Install
-// 	Uninstall Uninstall
-// }
-
 // Install describes an installment (contained in install.json)
 type Install struct {
 	Marathon bool `json:"marathon"`
@@ -86,7 +77,7 @@ type Uninstall struct {
 }
 
 // Universes describes known universes
-type Universes []Universe
+type Universes []string
 
 // Packages describes the known packages in a universe
 type Packages []string

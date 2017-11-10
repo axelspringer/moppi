@@ -35,8 +35,8 @@ func (server *Server) getUniverse(c web.C, w http.ResponseWriter, _ *http.Reques
 	return
 }
 
-// universesList returns all the known universes
-func (server *Server) universesList(w http.ResponseWriter, _ *http.Request) {
+// getUniverses returns all the known universes
+func (server *Server) getUniverses(w http.ResponseWriter, _ *http.Request) {
 	universes, err := server.provider.Universes()
 	if err != nil {
 		writeErrorJSON(w, "Could not retrieve the universes", 400, err)
@@ -44,20 +44,5 @@ func (server *Server) universesList(w http.ResponseWriter, _ *http.Request) {
 	}
 
 	writeJSON(w, universes)
-	return
-}
-
-// metaUniversesPkgs returns all the packages in a universe
-func (server *Server) universesPkgs(c web.C, w http.ResponseWriter, _ *http.Request) {
-	var pkgRequest provider.Request
-	pkgRequest.Universe = c.URLParams["universe"]
-
-	pkgs, err := server.provider.Packages(&pkgRequest)
-	if err != nil {
-		writeErrorJSON(w, "Could not retrieve packages", 400, err)
-		return
-	}
-
-	writeJSON(w, pkgs)
 	return
 }

@@ -38,6 +38,11 @@ func trailingSlash(s string) string {
 	return s
 }
 
+// universesPath gets the path to the universes from a prefix
+func universesPath(prefix string) string {
+	return prefix + provider.MoppiUniverses
+}
+
 // universePath gets a universe path from a prefix
 func universePath(prefix string, universe string) string {
 	return prefix + provider.MoppiUniverses + leadingSlash(universe)
