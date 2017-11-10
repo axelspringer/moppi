@@ -21,8 +21,25 @@ import (
 	"github.com/zenazn/goji/web"
 )
 
-// metaUniversesPkg returns a universe package defintion
-func (server *Server) pkgRevisions(c web.C, w http.ResponseWriter, _ *http.Request) {
+// getPkg returns a universe package
+func (server *Server) getPkg(c web.C, w http.ResponseWriter, _ *http.Request) {
+	var pkgRequest provider.Request
+	pkgRequest.Universe = c.URLParams["universe"]
+	pkgRequest.Name = c.URLParams["name"]
+	pkgRequest.Revision = c.URLParams["revision"]
+
+	revs, err := server.provider.Package(&pkgRequest)
+	if err != nil {
+		writeErrorJSON(w, "Could not retrieve packages", 400, err)
+		return
+	}
+
+	writeJSON(w, revs)
+	return
+}
+
+// getPkgRevisions returns a universe package defintion
+func (server *Server) getPkgRevisions(c web.C, w http.ResponseWriter, _ *http.Request) {
 	var pkgRequest provider.Request
 	pkgRequest.Universe = c.URLParams["universe"]
 	pkgRequest.Name = c.URLParams["name"]

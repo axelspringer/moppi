@@ -15,12 +15,9 @@
 package kv
 
 import (
-	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/axelspringer/moppi/provider"
-	"github.com/docker/libkv/store"
 )
 
 // leadingSlash is adding a slash to the beginning
@@ -51,21 +48,7 @@ func universeMetaPath(prefix string, universe string) string {
 	return universePath(prefix, universe) + provider.MoppiUniversesMeta
 }
 
-// reflectKVPair is reflecting a struct on a kv path
-func reflectKVPair(s interface{}, path string, kv store.Store) {
-	st := reflect.TypeOf(s)
-	for i := 0; i < st.NumField(); i++ {
-		key := trailingSlash(path) + strings.ToLower(st.Field(i).Name)
-		if val, err := kv.Get(key); err == nil {
-			f := reflect.ValueOf(s).Field(i)
-			f.Set(reflect.ValueOf(val))
-		}
-	}
-
-	fmt.Println(s)
-
-	// fmt.Println(st.NumField())
-	// for i := st.NumField(); i > 0; i-- {
-	// 	fmt.Println(st.Field(i).Name)
-	// }
+// universePkgPath gets a package from a universe
+func universePkgPath(prefix string, universe string, pkg string, rev string) string {
+	return prefix + provider.MoppiUniverses + leadingSlash(universe) + provider.MoppiPackages + leadingSlash(pkg) + leadingSlash(rev)
 }

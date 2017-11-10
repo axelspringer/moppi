@@ -101,6 +101,8 @@ func (t *Transcoder) transcode(name string, val reflect.Value) error {
 		err = t.transcodeFloat(name, val)
 	case reflect.Struct:
 		err = t.transcodeStruct(val)
+	// case reflect.Slice:
+	// 	err = t.transcodeSlice(name, val)
 	default:
 		// we have to work on here for value to pointed to
 		return fmt.Errorf("Unsupported type %s", valKind)

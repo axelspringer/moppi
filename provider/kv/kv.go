@@ -17,7 +17,6 @@ package kv
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -47,60 +46,14 @@ func (p *Provider) Version() (*store.KVPair, error) {
 
 // Package return a package
 func (p *Provider) Package(req *provider.Request) (*provider.Package, error) {
-	pkg := &provider.Package{}
-	path := p.Prefix + provider.MoppiUniverses + "/" + req.Universe + provider.MoppiPackages + "/" + req.Name + "/" + req.Revision
+	path := universePkgPath(p.Prefix, req.Universe, req.Name, req.Revision)
+	var pkg provider.Package
 
-	// info
-	kvInfo, err := p.kvClient.Get(path + provider.MoppiPackage)
-	if err != nil {
-		return pkg, err
-	}
-	err = json.Unmarshal(kvInfo.Value, &pkg)
-	if err != nil {
-		return pkg, err
+	if err := Transcode(&pkg, path, p.kvClient); err != nil {
+		return &pkg, err
 	}
 
-	// read install
-	kvInstall, err := p.kvClient.Get(path + provider.MoppiInstall)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(kvInstall.Value, &pkg.Install)
-	if err != nil {
-		return nil, err
-	}
-
-	// read uninstall
-	kvUninstall, err := p.kvClient.Get(path + provider.MoppiUninstall)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(kvUninstall.Value, &pkg.Uninstall)
-	if err != nil {
-		return nil, err
-	}
-
-	// read chronos
-	kvChronos, err := p.kvClient.Get(path + provider.MoppiChronos)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(kvChronos.Value, &pkg.Chronos)
-	if err != nil {
-		return nil, err
-	}
-
-	// read marathon
-	kvMarathon, err := p.kvClient.Get(path + provider.MoppiMarathon)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(kvMarathon.Value, &pkg.Marathon)
-	if err != nil {
-		return nil, err
-	}
-
-	return pkg, nil
+	return &pkg, nil
 }
 
 // Packages returns all the packages in a universe

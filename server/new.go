@@ -133,7 +133,8 @@ func (server *Server) Start() {
 	universes.Handle("/", server.universesList)
 	universes.Handle("/:universe/meta", server.getUniverse)
 	universes.Get("/:universe/packages", server.universesPkgs)
-	universes.Get("/:universe/packages/:name", server.pkgRevisions)
+	universes.Get("/:universe/packages/:name", server.getPkgRevisions)
+	universes.Get("/:universe/packages/:name/:revision", server.getPkg)
 
 	// create server
 	goji.ServeListener(server.listener)

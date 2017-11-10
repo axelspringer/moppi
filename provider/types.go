@@ -35,13 +35,7 @@ type Provider interface {
 type Universe struct {
 	Description string `kvstructure:"description"`
 	Name        string `kvstructure:"name"`
-	Version     bool   `kvstructure:"version"`
-	Number      int    `kvstructure:"number"`
-	Test        Test   `kvstructure:"test,json"`
-}
-
-type Test struct {
-	Test string `json:"test"`
+	Version     string `kvstructure:"version"`
 }
 
 // AbstractProvider is the base provider from which every provider inherits
@@ -63,12 +57,20 @@ type Request struct {
 
 // Package describes a package in the universe
 type Package struct {
-	Version   string `json:"version"`
-	Chronos   []chronos.Job
-	Marathon  []marathon.Application
-	Install   Install
-	Uninstall Uninstall
+	Chronos   []chronos.Job          `kvstructure:"chronos,json"`
+	Marathon  []marathon.Application `kvstructure:"marathon,json"`
+	Install   Install                `kvstructure:"install,json"`
+	Uninstall Uninstall              `kvstructure:"uninstall,json"`
 }
+
+// Package describes a package in the universe
+// type Package struct {
+// 	Version   string `json:"version"`
+// 	Chronos   []chronos.Job
+// 	Marathon  []marathon.Application
+// 	Install   Install
+// 	Uninstall Uninstall
+// }
 
 // Install describes an installment (contained in install.json)
 type Install struct {
