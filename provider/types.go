@@ -33,9 +33,14 @@ type Provider interface {
 
 // Universe describes a universe from endpoint /meta
 type Universe struct {
-	Version     string `kvstructure:"version"`
-	Name        string `kvstructure:"name"`
 	Description string `kvstructure:"description"`
+	Name        string `kvstructure:"name"`
+	Version     bool   `kvstructure:"version"`
+	Test        Test   `kvstructure:"test,json"`
+}
+
+type Test struct {
+	Test string `json:"test"`
 }
 
 // AbstractProvider is the base provider from which every provider inherits

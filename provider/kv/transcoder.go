@@ -15,9 +15,11 @@
 package kv
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -28,7 +30,6 @@ import (
 // to fill it with data from a kv.
 func Transcode(s interface{}, prefix string, kv store.Store) error {
 	config := &TranscoderConfig{
-		// mutex:    &sync.RWMutex{},
 		Prefix:   prefix,
 		KV:       kv,
 		Metadata: nil,
@@ -83,18 +84,6 @@ func (t *Transcoder) Transcode() error {
 	return t.transcode("", reflect.ValueOf(t.config.Result).Elem())
 }
 
-// readConfig muxes the config to read
-// func (t *Transcoder) readConfig() *TranscoderConfig {
-// 	defer t.config.mutex.Unlock()
-// 	t.config.mutex.RLock()
-// 	return t.config
-// }
-
-// // writeConfig muxes the config to write
-// func (t *Transcoder) writeConfig() {
-// 	defer t.config
-// }
-
 // transcode is doing the heavy lifting in the background
 func (t *Transcoder) transcode(name string, val reflect.Value) error {
 	var err error
@@ -102,8 +91,8 @@ func (t *Transcoder) transcode(name string, val reflect.Value) error {
 	switch valKind {
 	case reflect.String:
 		err = t.transcodeString(name, val)
-	// case reflect.Interface:
-	// 	err = t.dec
+	case reflect.Bool:
+		err = t.transcodeBool(name, val)
 	case reflect.Struct:
 		err = t.transcodeStruct(val)
 	default:
@@ -128,15 +117,41 @@ func (t *Transcoder) transcodeString(name string, val reflect.Value) error {
 		return err
 	}
 
-	// conv := true
+	conv := true
 	switch {
 	case val.Kind() == reflect.String:
 		val.SetString(string(kvPair.Value))
 	default:
-		// conv = false
+		conv = false
 	}
 
-	return err
+	// if conf was not successful
+	if !conv {
+		return err
+	}
+
+	return nil
+}
+
+// transcodeBool
+func (t *Transcoder) transcodeBool(name string, val reflect.Value) error {
+	kvPair, err := t.getKVPair(name)
+	if err != nil {
+		return err
+	}
+
+	switch {
+	case val.Kind() == reflect.Bool:
+		conv, err := strconv.ParseBool(string(kvPair.Value))
+		if err != nil {
+			return err
+		}
+		val.SetBool(conv)
+	default:
+		return fmt.Errorf("'%s' got unconvertible type '%s'", name, val.Type())
+	}
+
+	return nil
 }
 
 // transcodeStruct
@@ -157,6 +172,7 @@ func (t *Transcoder) transcodeStruct(val reflect.Value) error {
 	type field struct {
 		field reflect.StructField
 		val   reflect.Value
+		json  bool
 	}
 	fields := []field{}
 	for len(structs) > 0 { // could be easier
@@ -166,34 +182,25 @@ func (t *Transcoder) transcodeStruct(val reflect.Value) error {
 
 		for i := 0; i < valType.NumField(); i++ {
 			fieldType := valType.Field(i)
+			// json is somehow special
+			// it is curated by golang json
+			isJSON := false
 			// fieldKind := fieldType.Type.Kind()
 
-			// tagParts := strings.Split(fieldType.Tag.Get(t.config.TagName), ",")
-			// for _, tag := range tagParts[1:] {
-			// 	// test here for squashing
-			// 	fmt.Println(tag)
-			// }
+			tagParts := strings.Split(fieldType.Tag.Get(t.config.TagName), ",")
+			for _, tag := range tagParts[1:] {
+				// test here for squashing
+				if tag == "json" {
+					isJSON = true
+				}
+			}
 
-			fields = append(fields, field{fieldType, structVal.Field(i)})
+			fields = append(fields, field{fieldType, structVal.Field(i), isJSON})
 		}
 	}
 
-	// for i := 0; i < valType.NumField(); i++ {
-	// 	go func(i int, val reflect.Value, c *TranscoderConfig) {
-	// 		fmt.Println("test")
-	// 		// defer wg.Done()
-	// 		// defer c.mutex.Unlock()
-	// 		// c.mutex.Lock()
-
-	// 		// fmt.Println(t.config)
-	// 		// fmt.Println(c.Result)
-	// 	}(i, val, t.config)
-	// }
-
 	for _, f := range fields {
-		// go func(f field) {
-		// 	defer wg.Done()
-		field, val := f.field, f.val
+		field, val, isJSON := f.field, f.val, f.json
 		kv := field.Name
 
 		tag := field.Tag.Get(t.config.TagName)
@@ -202,12 +209,34 @@ func (t *Transcoder) transcodeStruct(val reflect.Value) error {
 			kv = tag
 		}
 
-		// key := trailingSlash(t.config.Prefix) + kv
-		// if v, err := t.config.KV.Get(key); err == nil {
-		// 	fmt.Println(string(v.Value))
-		// }
-
 		if !val.CanSet() {
+			wg.Done()
+
+			continue
+		}
+
+		// we deal with
+		if isJSON {
+			// remove field from group
+			wg.Done()
+
+			if !val.CanAddr() {
+				continue
+			}
+
+			kvPair, err := t.getKVPair(kv)
+			if err != nil {
+				errors = append(errors, err)
+				continue
+			}
+
+			obj := reflect.New(field.Type).Interface()
+			if err := json.Unmarshal(kvPair.Value, &obj); err != nil {
+				errors = append(errors, err)
+			}
+
+			val.Set(reflect.ValueOf(obj).Elem())
+
 			continue
 		}
 
@@ -217,13 +246,6 @@ func (t *Transcoder) transcodeStruct(val reflect.Value) error {
 				errors = append(errors, err)
 			}
 		}()
-
-		// key := trailingSlash(path) + strings.ToLower(st.Field(i).Name)
-		// if val, err := kv.Get(key); err == nil {
-		// 	f := reflect.ValueOf(s).Field(i)
-		// 	f.Set(reflect.ValueOf(val))
-		// }
-		// }(f)
 	}
 
 	wg.Wait()
