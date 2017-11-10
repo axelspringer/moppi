@@ -93,6 +93,12 @@ func (t *Transcoder) transcode(name string, val reflect.Value) error {
 		err = t.transcodeString(name, val)
 	case reflect.Bool:
 		err = t.transcodeBool(name, val)
+	case reflect.Int:
+		err = t.transcodeInt(name, val)
+	case reflect.Uint:
+		err = t.transcodeUint(name, val)
+	case reflect.Float32:
+		err = t.transcodeFloat(name, val)
 	case reflect.Struct:
 		err = t.transcodeStruct(val)
 	default:
@@ -116,11 +122,12 @@ func (t *Transcoder) transcodeString(name string, val reflect.Value) error {
 	if err != nil {
 		return err
 	}
+	kvVal := string(kvPair.Value)
 
 	conv := true
 	switch {
 	case val.Kind() == reflect.String:
-		val.SetString(string(kvPair.Value))
+		val.SetString(kvVal)
 	default:
 		conv = false
 	}
@@ -139,14 +146,87 @@ func (t *Transcoder) transcodeBool(name string, val reflect.Value) error {
 	if err != nil {
 		return err
 	}
+	kvVal := string(kvPair.Value)
 
 	switch {
 	case val.Kind() == reflect.Bool:
-		conv, err := strconv.ParseBool(string(kvPair.Value))
+		conv, err := strconv.ParseBool(kvVal)
 		if err != nil {
 			return err
 		}
 		val.SetBool(conv)
+	default:
+		return fmt.Errorf("'%s' got unconvertible type '%s'", name, val.Type())
+	}
+
+	return nil
+}
+
+// transcodeInt
+func (t *Transcoder) transcodeInt(name string, val reflect.Value) error {
+	kvPair, err := t.getKVPair(name)
+	if err != nil {
+		return err
+	}
+	kvVal := string(kvPair.Value)
+
+	switch {
+	case val.Kind() == reflect.Int:
+		conv, err := strconv.ParseInt(kvVal, 10, 64)
+		if err != nil {
+			return err
+		}
+		val.SetInt(conv)
+	case val.Kind() == reflect.Uint:
+		conv, err := strconv.ParseUint(kvVal, 10, 64)
+		if err != nil {
+			return err
+		}
+		val.SetUint(conv)
+	default:
+		return fmt.Errorf("'%s' got unconvertible type '%s'", name, val.Type())
+	}
+
+	return nil
+}
+
+// transcodeUint
+func (t *Transcoder) transcodeUint(name string, val reflect.Value) error {
+	kvPair, err := t.getKVPair(name)
+	if err != nil {
+		return err
+	}
+	kvVal := string(kvPair.Value)
+
+	switch {
+	case val.Kind() == reflect.Uint:
+		conv, err := strconv.ParseUint(kvVal, 10, 64)
+		if err != nil {
+			return err
+		}
+		val.SetUint(conv)
+	default:
+		return fmt.Errorf("'%s' got unconvertible type '%s'", name, val.Type())
+	}
+
+	return nil
+}
+
+// transcodeFloat32
+func (t *Transcoder) transcodeFloat(name string, val reflect.Value) error {
+	kvPair, err := t.getKVPair(name)
+	if err != nil {
+		return err
+	}
+	kvVal := string(kvPair.Value)
+
+	switch {
+	case val.Kind() == reflect.Float32:
+		conv, err := strconv.ParseFloat(kvVal, 64)
+		if err != nil {
+			return err
+		}
+		val.SetFloat(conv)
 	default:
 		return fmt.Errorf("'%s' got unconvertible type '%s'", name, val.Type())
 	}

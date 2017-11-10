@@ -36,6 +36,7 @@ type Universe struct {
 	Description string `kvstructure:"description"`
 	Name        string `kvstructure:"name"`
 	Version     bool   `kvstructure:"version"`
+	Number      int    `kvstructure:"number"`
 	Test        Test   `kvstructure:"test,json"`
 }
 
