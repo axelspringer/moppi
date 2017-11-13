@@ -77,7 +77,7 @@ type Uninstall struct {
 }
 
 // Universes describes known universes
-type Universes []string
+type Universes []Universe
 
 // Packages describes the known packages in a universe
 type Packages []string
