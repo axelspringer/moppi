@@ -33,9 +33,9 @@ type Provider interface {
 
 // Universe describes a universe from endpoint /meta
 type Universe struct {
-	Description string `kvstructure:"description"`
-	Name        string `kvstructure:"name"`
-	Version     string `kvstructure:"version"`
+	Description string `kvstructure:"description" json:"description"`
+	Name        string `kvstructure:"name" json:"name"`
+	Version     string `kvstructure:"version" json:"version"`
 }
 
 // AbstractProvider is the base provider from which every provider inherits
@@ -57,10 +57,10 @@ type Request struct {
 
 // Package describes a package in the universe
 type Package struct {
-	Chronos   []chronos.Job          `kvstructure:"chronos,json"`
-	Marathon  []marathon.Application `kvstructure:"marathon,json"`
-	Install   Install                `kvstructure:"install,json"`
-	Uninstall Uninstall              `kvstructure:"uninstall,json"`
+	Chronos   []chronos.Job          `kvstructure:"chronos,json" json:"chronos"`
+	Marathon  []marathon.Application `kvstructure:"marathon,json" json:"marathon"`
+	Install   Install                `kvstructure:"install,json" json:"install"`
+	Uninstall Uninstall              `kvstructure:"uninstall,json" json:"uninstall"`
 }
 
 // Install describes an installment (contained in install.json)
