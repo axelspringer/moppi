@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/rs/cors"
 	"github.com/zenazn/goji/web/middleware"
 
 	"github.com/axelspringer/moppi/cfg"
@@ -125,6 +126,10 @@ func (server *Server) Start() {
 	// setup signals
 	server.configSignals()
 	go server.watchSignals()
+
+	// cors, allow allow for now
+	c := cors.AllowAll()
+	goji.Use(c.Handler)
 
 	// status
 	goji.Get("/ping", server.ping)
