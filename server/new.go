@@ -77,7 +77,7 @@ func (server *Server) installPackage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	pkg, err := server.provider.Package(packageRequest)
+	pkg, err := server.provider.GetPackage(packageRequest)
 	if err != nil {
 		writeErrorJSON(w, "Could not parse the package request", 400, err)
 		return
@@ -99,7 +99,7 @@ func (server *Server) uninstallPackage(w http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	pkg, err := server.provider.Package(packageRequest)
+	pkg, err := server.provider.GetPackage(packageRequest)
 	if err != nil {
 		writeErrorJSON(w, "Could not parse the package request", 400, err)
 		return
@@ -113,12 +113,12 @@ func (server *Server) uninstallPackage(w http.ResponseWriter, req *http.Request)
 
 // version returns the version of the repository
 func (server *Server) version(w http.ResponseWriter, req *http.Request) {
-	version, err := server.provider.Version()
+	ver, err := server.provider.Version()
 	if err != nil {
 		w.WriteHeader(400)
 		return
 	}
-	io.WriteString(w, string(version.Value))
+	io.WriteString(w, string(ver.Value))
 }
 
 // Start is starting to serve the api
@@ -140,15 +140,20 @@ func (server *Server) Start() {
 	goji.Post("/install", server.installPackage)
 	goji.Post("/uninstall", server.uninstallPackage)
 
-	// universes
+	// sub router universes
 	universes := web.New()
-	goji.Handle("/universes", server.getUniverses)
+	goji.Get("/universes", server.getUniverses)
+	goji.Post("/universes", server.createUniverse)
 	goji.Handle("/universes/*", universes)
 	universes.Use(middleware.SubRouter)
-	universes.Handle("/:universe/meta", server.getUniverse)
+	universes.Get("/:universe/meta", server.getUniverse)
+	universes.Delete("/:universe", server.deleteUniverse)
 	universes.Get("/:universe/packages", server.getPkgs)
 	universes.Get("/:universe/packages/:name", server.getPkgRevisions)
+	universes.Delete("/:universe/packages/:name", server.deletePkg)
 	universes.Get("/:universe/packages/:name/:revision", server.getPkg)
+	universes.Post("/:universe/packages/:name", server.createPkgRevision)
+	universes.Delete("/:universe/packages/:name/:revision", server.deletePkgRevision)
 
 	// create server
 	goji.ServeListener(server.listener)

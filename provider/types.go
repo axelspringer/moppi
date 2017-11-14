@@ -23,19 +23,25 @@ import (
 // Provider defines the interface to a Provider (e.g. etcd)
 type Provider interface {
 	Version() (*store.KVPair, error)
-	Universe(req *Request) (*Universe, error)
-	Universes() (*Universes, error)
-	Revisions(req *Request) (*PackageRevisions, error)
-	Package(req *Request) (*Package, error)
-	Packages(req *Request) (*Packages, error)
+	CreateUniverse(u *Universe) error
+	GetUniverse(req *Request) (*Universe, error)
+	GetUniverses() (*Universes, error)
+	GetRevisions(req *Request) (*PackageRevisions, error)
+	GetPackage(req *Request) (*Package, error)
+	GetPackages(req *Request) (*Packages, error)
 	// Packages() (map[string]map[int]*install.Package, error)
 }
+
+// Version describes the version of a moppi installation
+type Version string
 
 // Universe describes a universe from endpoint /meta
 type Universe struct {
 	Description string `kvstructure:"description" json:"description"`
 	Name        string `kvstructure:"name" json:"name"`
 	Version     string `kvstructure:"version" json:"version"`
+	Test        int    `kvstructure:"test" json:"test"`
+	Href        string `json:"href"`
 }
 
 // AbstractProvider is the base provider from which every provider inherits

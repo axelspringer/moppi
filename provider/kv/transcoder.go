@@ -19,21 +19,19 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/docker/libkv/store"
 )
 
-// Transcode takes an interface and uses reflection
-// to fill it with data from a kv.
+// Transcode takes an initialized interface and puts the data in a kv
 func Transcode(s interface{}, prefix string, kv store.Store) error {
 	config := &TranscoderConfig{
 		Prefix:   prefix,
 		KV:       kv,
 		Metadata: nil,
-		Result:   s,
+		Input:    s,
 	}
 
 	transcoder, err := NewTranscoder(config)
@@ -45,17 +43,16 @@ func Transcode(s interface{}, prefix string, kv store.Store) error {
 }
 
 // NewTranscoder returns a new transcoder for the given configuration.
-// Once a transcoder has been returned, the same configuration must not be used
-// again.
+// Once a transcoder has been returned, the same interface must be used
 func NewTranscoder(config *TranscoderConfig) (*Transcoder, error) {
-	val := reflect.ValueOf(config.Result)
+	val := reflect.ValueOf(config.Input)
 	if val.Kind() != reflect.Ptr {
-		return nil, errors.New("result must be a pointer")
+		return nil, errors.New("input muse be a pointer")
 	}
 
 	val = val.Elem()
 	if !val.CanAddr() {
-		return nil, errors.New("result must be addressable (a pointer)")
+		return nil, errors.New("input must be addressable (a pointer)")
 	}
 
 	if config.Metadata != nil {
@@ -79,15 +76,15 @@ func NewTranscoder(config *TranscoderConfig) (*Transcoder, error) {
 	return result, nil
 }
 
-// Transcode transcodes a given raw interface to a filled structure
+// Transcode is transcoding a given raw value interface to data in a kv store
 func (t *Transcoder) Transcode() error {
-	return t.transcode("", reflect.ValueOf(t.config.Result).Elem())
+	return t.transcode("", reflect.ValueOf(t.config.Input).Elem())
 }
 
 // transcode is doing the heavy lifting in the background
 func (t *Transcoder) transcode(name string, val reflect.Value) error {
 	var err error
-	valKind := getKind(val)
+	valKind := getKind(reflect.Indirect(val))
 	switch valKind {
 	case reflect.String:
 		err = t.transcodeString(name, val)
@@ -95,10 +92,10 @@ func (t *Transcoder) transcode(name string, val reflect.Value) error {
 		err = t.transcodeBool(name, val)
 	case reflect.Int:
 		err = t.transcodeInt(name, val)
-	case reflect.Uint:
-		err = t.transcodeUint(name, val)
-	case reflect.Float32:
-		err = t.transcodeFloat(name, val)
+	// case reflect.Uint:
+	// 	err = t.transcodeUint(name, val)
+	// case reflect.Float32:
+	// 	err = t.transcodeFloat(name, val)
 	case reflect.Struct:
 		err = t.transcodeStruct(val)
 	// case reflect.Slice:
@@ -112,131 +109,32 @@ func (t *Transcoder) transcode(name string, val reflect.Value) error {
 	return err
 }
 
-// transcodeBasic transcodes a basic type (bool, int, strinc, etc.)
-// and eventually sets it to the retrieved value
-func (t *Transcoder) transcodeBasic(val reflect.Value) error {
-	return nil
-}
-
-// transcodeString
+// transdecodeString
 func (t *Transcoder) transcodeString(name string, val reflect.Value) error {
-	kvPair, err := t.getKVPair(name)
-	if err != nil {
-		return err
-	}
-	kvVal := string(kvPair.Value)
-
-	conv := true
-	switch {
-	case val.Kind() == reflect.String:
-		val.SetString(kvVal)
-	default:
-		conv = false
-	}
-
-	// if conf was not successful
-	if !conv {
-		return err
-	}
-
-	return nil
+	return t.putKVPair(name, []byte(val.String()))
 }
 
 // transcodeBool
 func (t *Transcoder) transcodeBool(name string, val reflect.Value) error {
-	kvPair, err := t.getKVPair(name)
-	if err != nil {
-		return err
-	}
-	kvVal := string(kvPair.Value)
-
-	switch {
-	case val.Kind() == reflect.Bool:
-		conv, err := strconv.ParseBool(kvVal)
-		if err != nil {
-			return err
-		}
-		val.SetBool(conv)
-	default:
-		return fmt.Errorf("'%s' got unconvertible type '%s'", name, val.Type())
-	}
-
-	return nil
+	return t.putKVPair(name, []byte(fmt.Sprint(val)))
 }
 
 // transcodeInt
 func (t *Transcoder) transcodeInt(name string, val reflect.Value) error {
-	kvPair, err := t.getKVPair(name)
-	if err != nil {
-		return err
-	}
-	kvVal := string(kvPair.Value)
-
-	switch {
-	case val.Kind() == reflect.Int:
-		conv, err := strconv.ParseInt(kvVal, 10, 64)
-		if err != nil {
-			return err
-		}
-		val.SetInt(conv)
-	case val.Kind() == reflect.Uint:
-		conv, err := strconv.ParseUint(kvVal, 10, 64)
-		if err != nil {
-			return err
-		}
-		val.SetUint(conv)
-	default:
-		return fmt.Errorf("'%s' got unconvertible type '%s'", name, val.Type())
-	}
-
-	return nil
+	return t.putKVPair(name, []byte(fmt.Sprint(val)))
 }
 
-// transcodeUint
+// transdecodeUint
 func (t *Transcoder) transcodeUint(name string, val reflect.Value) error {
-	kvPair, err := t.getKVPair(name)
-	if err != nil {
-		return err
-	}
-	kvVal := string(kvPair.Value)
-
-	switch {
-	case val.Kind() == reflect.Uint:
-		conv, err := strconv.ParseUint(kvVal, 10, 64)
-		if err != nil {
-			return err
-		}
-		val.SetUint(conv)
-	default:
-		return fmt.Errorf("'%s' got unconvertible type '%s'", name, val.Type())
-	}
-
 	return nil
 }
 
-// transcodeFloat32
+// transdecodeFloat
 func (t *Transcoder) transcodeFloat(name string, val reflect.Value) error {
-	kvPair, err := t.getKVPair(name)
-	if err != nil {
-		return err
-	}
-	kvVal := string(kvPair.Value)
-
-	switch {
-	case val.Kind() == reflect.Float32:
-		conv, err := strconv.ParseFloat(kvVal, 64)
-		if err != nil {
-			return err
-		}
-		val.SetFloat(conv)
-	default:
-		return fmt.Errorf("'%s' got unconvertible type '%s'", name, val.Type())
-	}
-
 	return nil
 }
 
-// transcodeStruct
+// transdecodeStruct
 func (t *Transcoder) transcodeStruct(val reflect.Value) error {
 	valInterface := reflect.Indirect(val)
 	valType := valInterface.Type()
@@ -257,17 +155,14 @@ func (t *Transcoder) transcodeStruct(val reflect.Value) error {
 		json  bool
 	}
 	fields := []field{}
-	for len(structs) > 0 { // could be easier
+
+	for len(structs) > 0 {
 		structVal := structs[0]
 		structs = structs[1:]
-		// here we should do squashing
 
 		for i := 0; i < valType.NumField(); i++ {
 			fieldType := valType.Field(i)
-			// json is somehow special
-			// it is curated by golang json
 			isJSON := false
-			// fieldKind := fieldType.Type.Kind()
 
 			tagParts := strings.Split(fieldType.Tag.Get(t.config.TagName), ",")
 			for _, tag := range tagParts[1:] {
@@ -277,10 +172,11 @@ func (t *Transcoder) transcodeStruct(val reflect.Value) error {
 				}
 			}
 
-			fields = append(fields, field{fieldType, structVal.Field(i), isJSON})
+			fields = append(fields, field{fieldType, structVal.Elem().Field(i), isJSON})
 		}
 	}
 
+	// evaluate all fields
 	for _, f := range fields {
 		field, val, isJSON := f.field, f.val, f.json
 		kv := field.Name
@@ -291,13 +187,13 @@ func (t *Transcoder) transcodeStruct(val reflect.Value) error {
 			kv = tag
 		}
 
-		if !val.CanSet() {
+		if !val.CanAddr() {
 			wg.Done()
 
 			continue
 		}
 
-		// we deal with
+		// 	// we deal with
 		if isJSON {
 			// remove field from group
 			wg.Done()
@@ -306,18 +202,16 @@ func (t *Transcoder) transcodeStruct(val reflect.Value) error {
 				continue
 			}
 
-			kvPair, err := t.getKVPair(kv)
+			b, err := json.Marshal(val.Interface())
 			if err != nil {
 				errors = append(errors, err)
 				continue
 			}
 
-			obj := reflect.New(field.Type).Interface()
-			if err := json.Unmarshal(kvPair.Value, &obj); err != nil {
+			// write to kv
+			if err := t.putKVPair(kv, b); err != nil {
 				errors = append(errors, err)
 			}
-
-			val.Set(reflect.ValueOf(obj).Elem())
 
 			continue
 		}
@@ -328,6 +222,7 @@ func (t *Transcoder) transcodeStruct(val reflect.Value) error {
 				errors = append(errors, err)
 			}
 		}()
+
 	}
 
 	wg.Wait()
@@ -335,27 +230,13 @@ func (t *Transcoder) transcodeStruct(val reflect.Value) error {
 	return nil
 }
 
-func (t *Transcoder) getKVPair(key string) (*store.KVPair, error) {
-	kvPair, err := t.config.KV.Get(trailingSlash(t.config.Prefix) + key)
-	if err != nil {
-		return nil, err
-	}
-
-	return kvPair, nil
+// transdecodeBasic transdecode a basic type (bool, int, strinc, etc.)
+// and eventually sets it to the retrieved value
+func (t *Transcoder) transdecodeBasic(val reflect.Value) error {
+	return nil
 }
 
-// getKind is returning the kind of the reflected value
-func getKind(val reflect.Value) reflect.Kind {
-	kind := val.Kind()
-
-	switch {
-	case kind >= reflect.Int && kind <= reflect.Int64:
-		return reflect.Int
-	case kind >= reflect.Uint && kind <= reflect.Uint64:
-		return reflect.Uint
-	case kind >= reflect.Float32 && kind <= reflect.Float64:
-		return reflect.Float32
-	default:
-		return kind
-	}
+// putKVPair
+func (t *Transcoder) putKVPair(key string, value []byte) error {
+	return t.config.KV.Put(trailingSlash(t.config.Prefix)+key, value, nil)
 }

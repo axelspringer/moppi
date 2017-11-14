@@ -19,9 +19,9 @@ import (
 	"github.com/docker/libkv/store"
 )
 
-// Transcoder is the configuration that is used to create a new transcoder
+// TransdecoderConfig is the configuration that is used to create a new transdecoder
 // and allows customization of various aspects of decoding.
-type TranscoderConfig struct {
+type TransdecoderConfig struct {
 	// mutex *sync.RWMutex
 
 	// ZeroFields, if set to true, will zero fields before writing them.
@@ -51,7 +51,36 @@ type TranscoderConfig struct {
 	KV store.Store
 }
 
-// A Transcoder takes a raw interface value and turns it into structured data
+// TranscoderConfig is the configuration that is used to create a new transcoder
+// and allows customization of various aspects of decoding.
+type TranscoderConfig struct {
+	// mutex *sync.RWMutex
+
+	// Result is a pointer to the struct that will contain the decoded
+	// value.
+	Input interface{}
+
+	// Metadata is the struct that will contain extra metadata about
+	// the decoding. If this is nil, then no metadata will be tracked.
+	Metadata *Metadata
+
+	// The tag name that kvstructure reads for field names. This
+	// defaults to "kvstructure"
+	TagName string
+
+	// Prefix is the prefix of the store
+	Prefix string
+
+	// KV is the kv used to retrieve the needed infos
+	KV store.Store
+}
+
+// A Transdecoder takes a raw interface value and turns it into structured data
+type Transdecoder struct {
+	config *TransdecoderConfig
+}
+
+// A Transcoder takes a raw interface and puts it into a kv structure
 type Transcoder struct {
 	config *TranscoderConfig
 }

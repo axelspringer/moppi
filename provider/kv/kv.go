@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/axelspringer/moppi/provider"
@@ -38,26 +39,26 @@ func (p *Provider) SetKVClient(kvClient store.Store) {
 	p.kvClient = kvClient
 }
 
-// Version returns the version of the universe
+// Version returns the version of the
 func (p *Provider) Version() (*store.KVPair, error) {
 	ver, err := p.kvClient.Get(p.Prefix + provider.MoppiMetaVersion)
 	return ver, err
 }
 
-// Package return a package
-func (p *Provider) Package(req *provider.Request) (*provider.Package, error) {
+// GetPackage return a package
+func (p *Provider) GetPackage(req *provider.Request) (*provider.Package, error) {
 	path := universePkgPath(p.Prefix, req.Universe, req.Name, req.Revision)
 	var pkg provider.Package
 
-	if err := Transcode(&pkg, path, p.kvClient); err != nil {
+	if err := Transdecode(&pkg, path, p.kvClient); err != nil {
 		return &pkg, err
 	}
 
 	return &pkg, nil
 }
 
-// Packages returns all the packages in a universe
-func (p *Provider) Packages(req *provider.Request) (*provider.Packages, error) {
+// GetPackages returns all the packages in a universe
+func (p *Provider) GetPackages(req *provider.Request) (*provider.Packages, error) {
 	pkgs := make(provider.Packages, 0)
 	path := p.Prefix + provider.MoppiUniverses + leadingSlash(req.Universe) + provider.MoppiPackages
 	path = trailingSlash(path)
@@ -75,8 +76,8 @@ func (p *Provider) Packages(req *provider.Request) (*provider.Packages, error) {
 	return &pkgs, nil
 }
 
-// Revisions returns all the revisions of a package in a univers
-func (p *Provider) Revisions(req *provider.Request) (*provider.PackageRevisions, error) {
+// GetRevisions returns all the revisions of a package in a univers
+func (p *Provider) GetRevisions(req *provider.Request) (*provider.PackageRevisions, error) {
 	revs := make(provider.PackageRevisions, 0)
 	path := p.Prefix + provider.MoppiUniverses + leadingSlash(req.Universe) + provider.MoppiPackages + leadingSlash(req.Name)
 	path = trailingSlash(path)
@@ -94,8 +95,80 @@ func (p *Provider) Revisions(req *provider.Request) (*provider.PackageRevisions,
 	return &revs, nil
 }
 
-// Universes return all available universes
-func (p *Provider) Universes() (*provider.Universes, error) {
+// CreateUniverse creates a new universe
+func (p *Provider) CreateUniverse(u *provider.Universe) error {
+	path := universeMetaPath(p.Prefix, strings.ToLower(u.Name))
+
+	return Transcode(&u, path, p.kvClient)
+}
+
+// DeleteUniverse deletes a universe
+func (p *Provider) DeleteUniverse(req *provider.Request) error {
+	path := universePath(p.Prefix, req.Universe)
+
+	return p.kvClient.DeleteTree(path)
+}
+
+// DeletePackage deletes a package form a universe
+func (p *Provider) DeletePackage(req *provider.Request) error {
+	path := universePkgBasePath(p.Prefix, req.Universe, req.Name)
+
+	return p.kvClient.DeleteTree(path)
+}
+
+// CreatePackageRevision creates a new package revision in a universe
+// and returns the new revision and any error
+func (p *Provider) CreatePackageRevision(req *provider.Request, pkg *provider.Package) (*int, error) {
+	// check if package exists
+	path := universePkgBasePath(p.Prefix, req.Universe, req.Name)
+	rev := 1
+
+	// if not exists, create package
+	if ok, _ := p.kvClient.Exists(path); !ok {
+		// create package in universe
+		// @todo check if universe exists
+		revPath := universePkgPath(p.Prefix, req.Universe, req.Name, fmt.Sprint(rev))
+
+		// Transcode
+		if err := Transcode(&pkg, revPath, p.kvClient); err != nil {
+			return nil, err
+		}
+
+		return &rev, nil
+	}
+
+	// get all revisions
+	revs, err := p.kvClient.List(path) // is sorted from etcd
+	if err != nil {
+		return nil, err
+	}
+
+	kvRevPath := strings.Split(string(revs[len(revs)-1].Key), "/")
+	kvRev := kvRevPath[len(kvRevPath)-1]
+
+	rev, err = strconv.Atoi(kvRev)
+	if err != nil {
+		return nil, err
+	}
+	revPath := universePkgPath(p.Prefix, req.Universe, req.Name, fmt.Sprint(rev+1))
+
+	// Transcode
+	if err := Transcode(&pkg, revPath, p.kvClient); err != nil {
+		return nil, err
+	}
+
+	return &rev, nil
+}
+
+// DeletePackageRevision deletes a package revision from a universe
+func (p *Provider) DeletePackageRevision(req *provider.Request) error {
+	path := universePkgPath(p.Prefix, req.Universe, req.Name, req.Revision)
+
+	return p.kvClient.DeleteTree(path)
+}
+
+// GetUniverses return all available universes
+func (p *Provider) GetUniverses() (*provider.Universes, error) {
 	universes := make(provider.Universes, 0)
 	universesPath := universesPath(p.Prefix)
 
@@ -105,27 +178,28 @@ func (p *Provider) Universes() (*provider.Universes, error) {
 		return nil, err
 	}
 
-	for _, universe := range kvUniverses {
-		universePath := universe.Key + provider.MoppiUniversesMeta
+	for _, kvUniverse := range kvUniverses {
+		universePath := kvUniverse.Key + provider.MoppiUniversesMeta
 		var universe provider.Universe
 
-		err := Transcode(&universe, universePath, p.kvClient)
+		err := Transdecode(&universe, universePath, p.kvClient)
 		if err != nil {
 			return &universes, err
 		}
 
+		universe.Href = kvUniverse.Key
 		universes = append(universes, universe)
 	}
 
 	return &universes, nil
 }
 
-// Universe return the meta infos of a universe
-func (p *Provider) Universe(req *provider.Request) (*provider.Universe, error) {
+// GetUniverse return the meta infos of a universe
+func (p *Provider) GetUniverse(req *provider.Request) (*provider.Universe, error) {
 	path := universeMetaPath(p.Prefix, req.Universe)
 	var universe provider.Universe
 
-	if err := Transcode(&universe, path, p.kvClient); err != nil {
+	if err := Transdecode(&universe, path, p.kvClient); err != nil {
 		return &universe, err
 	}
 

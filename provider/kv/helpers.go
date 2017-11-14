@@ -53,7 +53,12 @@ func universeMetaPath(prefix string, universe string) string {
 	return universePath(prefix, universe) + provider.MoppiUniversesMeta
 }
 
+// universePkgBasePath gets a package from a universe
+func universePkgBasePath(prefix string, universe string, pkg string) string {
+	return prefix + provider.MoppiUniverses + leadingSlash(universe) + provider.MoppiPackages + leadingSlash(pkg)
+}
+
 // universePkgPath gets a package from a universe
 func universePkgPath(prefix string, universe string, pkg string, rev string) string {
-	return prefix + provider.MoppiUniverses + leadingSlash(universe) + provider.MoppiPackages + leadingSlash(pkg) + leadingSlash(rev)
+	return universePkgBasePath(prefix, universe, pkg) + leadingSlash(rev)
 }

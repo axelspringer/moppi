@@ -22,19 +22,39 @@ import (
 
 var _ provider.Provider = (*Provider)(nil)
 
-// Package gets a package from etcd
-func (p *Provider) Package(req *provider.Request) (*provider.Package, error) {
-	return p.Provider.Package(req)
+// GetPackage gets a package from etcd
+func (p *Provider) GetPackage(req *provider.Request) (*provider.Package, error) {
+	return p.Provider.GetPackage(req)
 }
 
-// Packages gets all the packages from a universe in the etcd
-func (p *Provider) Packages(req *provider.Request) (*provider.Packages, error) {
-	return p.Provider.Packages(req)
+// GetPackages gets all the packages from a universe in the etcd
+func (p *Provider) GetPackages(req *provider.Request) (*provider.Packages, error) {
+	return p.Provider.GetPackages(req)
 }
 
-// Revisions gets all the packages revisions from a universe
-func (p *Provider) Revisions(req *provider.Request) (*provider.PackageRevisions, error) {
-	return p.Provider.Revisions(req)
+// DeletePackage deletes a package from the universe in the etcd
+func (p *Provider) DeletePackage(req *provider.Request) error {
+	return p.Provider.DeletePackage(req)
+}
+
+// DeletePackageRevision deletes a revision of a package in the etcd
+func (p *Provider) DeletePackageRevision(req *provider.Request) error {
+	return p.Provider.DeletePackageRevision(req) // @todo, this is happy path
+}
+
+// GetRevisions gets all the packages revisions from a universe
+func (p *Provider) GetRevisions(req *provider.Request) (*provider.PackageRevisions, error) {
+	return p.Provider.GetRevisions(req)
+}
+
+// CreateUniverse creates a new universe
+func (p *Provider) CreateUniverse(u *provider.Universe) error {
+	return p.Provider.CreateUniverse(u)
+}
+
+// DeleteUniverse creates a new universe
+func (p *Provider) DeleteUniverse(req *provider.Request) error {
+	return p.Provider.DeleteUniverse(req)
 }
 
 // Version gets the meta version of the moppi repo
@@ -42,14 +62,14 @@ func (p *Provider) Version() (*store.KVPair, error) {
 	return p.Provider.Version()
 }
 
-// Universe gets the meta info of a universe
-func (p *Provider) Universe(req *provider.Request) (*provider.Universe, error) {
-	return p.Provider.Universe(req)
+// GetUniverse gets the meta info of a universe
+func (p *Provider) GetUniverse(req *provider.Request) (*provider.Universe, error) {
+	return p.Provider.GetUniverse(req)
 }
 
-// Universes gets all the known universes
-func (p *Provider) Universes() (*provider.Universes, error) {
-	return p.Provider.Universes()
+// GetUniverses gets all the known universes
+func (p *Provider) GetUniverses() (*provider.Universes, error) {
+	return p.Provider.GetUniverses()
 }
 
 // CheckVersion checks the meta version of the moppi repo

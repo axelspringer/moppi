@@ -15,7 +15,10 @@
 package server
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/axelspringer/moppi/provider"
 	"github.com/zenazn/goji/web"
@@ -28,9 +31,9 @@ func (server *Server) getPkg(c web.C, w http.ResponseWriter, _ *http.Request) {
 	pkgRequest.Name = c.URLParams["name"]
 	pkgRequest.Revision = c.URLParams["revision"]
 
-	revs, err := server.provider.Package(&pkgRequest)
+	revs, err := server.provider.GetPackage(&pkgRequest)
 	if err != nil {
-		writeErrorJSON(w, "Could not retrieve packages", 400, err)
+		writeErrorJSON(w, "Could not retrieve packages", http.StatusBadRequest, err)
 		return
 	}
 
@@ -44,9 +47,9 @@ func (server *Server) getPkgRevisions(c web.C, w http.ResponseWriter, _ *http.Re
 	pkgRequest.Universe = c.URLParams["universe"]
 	pkgRequest.Name = c.URLParams["name"]
 
-	revs, err := server.provider.Revisions(&pkgRequest)
+	revs, err := server.provider.GetRevisions(&pkgRequest)
 	if err != nil {
-		writeErrorJSON(w, "Could not retrieve revisions", 400, err)
+		writeErrorJSON(w, "Could not retrieve revisions", http.StatusBadRequest, err)
 		return
 	}
 
@@ -59,12 +62,72 @@ func (server *Server) getPkgs(c web.C, w http.ResponseWriter, _ *http.Request) {
 	var pkgRequest provider.Request
 	pkgRequest.Universe = c.URLParams["universe"]
 
-	pkgs, err := server.provider.Packages(&pkgRequest)
+	pkgs, err := server.provider.GetPackages(&pkgRequest)
 	if err != nil {
-		writeErrorJSON(w, "Could not retrieve packages", 400, err)
+		writeErrorJSON(w, "Could not retrieve packages", http.StatusBadRequest, err)
 		return
 	}
 
 	writeJSON(w, pkgs)
 	return
+}
+
+// deletePkg deletes a package from a universe
+func (server *Server) deletePkg(c web.C, w http.ResponseWriter, req *http.Request) {
+	var pkgRequest provider.Request
+	pkgRequest.Universe = c.URLParams["universe"]
+	pkgRequest.Name = c.URLParams["name"]
+
+	if err := server.provider.DeletePackage(&pkgRequest); err != nil {
+		writeErrorJSON(w, "Could not delete the package", http.StatusBadRequest, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// deletePkgRevision deletes a revision of a package in a universe
+func (server *Server) deletePkgRevision(c web.C, w http.ResponseWriter, req *http.Request) {
+	var pkgRequest provider.Request
+	pkgRequest.Universe = c.URLParams["universe"]
+	pkgRequest.Name = c.URLParams["name"]
+	pkgRequest.Revision = c.URLParams["revision"]
+
+	if err := server.provider.DeletePackageRevision(&pkgRequest); err != nil {
+		writeErrorJSON(w, "Could not delete the revision", http.StatusBadRequest, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// createPkgRevision creates a new revision of a package in a universe
+func (server *Server) createPkgRevision(c web.C, w http.ResponseWriter, req *http.Request) {
+	var err error
+	var pkg provider.Package
+	var pkgRequest provider.Request
+	pkgRequest.Universe = c.URLParams["universe"]
+	pkgRequest.Name = c.URLParams["name"]
+
+	// empty body
+	if req.Body == nil {
+		writeErrorJSON(w, "Please send a request body", http.StatusBadRequest, err)
+		return
+	}
+
+	// decode request
+	if err := json.NewDecoder(req.Body).Decode(&pkg); err != nil {
+		writeErrorJSON(w, "Could not parse the request", http.StatusBadRequest, err)
+		return
+	}
+
+	// create new revision
+	rev, err := server.provider.CreatePackageRevision(&pkgRequest, &pkg)
+	if err != nil {
+		writeErrorJSON(w, "Could not create a new package revision", http.StatusBadRequest, err)
+	}
+
+	// simply write the newly created revision
+	w.WriteHeader(http.StatusOK)
+	io.WriteString(w, strconv.Itoa(*rev))
 }
