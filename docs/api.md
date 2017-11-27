@@ -129,3 +129,35 @@ Returns nothing
         install: {},
         uninstall: {}
     }
+
+# Group Install/Uninstall 
+
+### Install a package [POST /install]
+
+Triggers the installation of a new package
+
++ Response 201
+
++ Request Install a package (application/json)
+
+    {
+        "universe": "dev",
+        "revision": 1,
+        "name": "example",
+        "config": {}
+    }
+
+### Uninstall a package [POST /uninstall]
+
+Triggers the installation of a new package
+
++ Response 201
+
++ Request Uninstall a package (application/json)
+
+    {
+        "universe": "dev",
+        "revision": 1,
+        "name": "example",
+        "config": {}
+    }
