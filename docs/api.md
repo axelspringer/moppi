@@ -85,12 +85,28 @@ A list containing all packages available in a universe.
         "example"
     ]
 
+### Create new Package or new Revision [POST /packages/{package}]
+
+Creates a new Package if there is no package, or creates a new revision if though a package already exists.
+
++ Parameters
+    + package:1 (required, string) - Name of the package in form of a string
+
++ Request Create a new package or revision (application/json)
+
+    {
+        "marathon": [],
+        "chronos": [],
+        "install": {},
+        "uninstall": {}
+    }
+
 ### List all Revisions [GET /packages/{package}]
 
 A list of all package revisions.
 
 + Parameters
-    + package: 1 (required, string) - Name of the universe in form of a string
+    + package: 1 (required, string) - Name of the package in form of a string
 
 + Response 200 (application/json)
 
