@@ -128,6 +128,6 @@ func (server *Server) createPkgRevision(c web.C, w http.ResponseWriter, req *htt
 	}
 
 	// simply write the newly created revision
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 	io.WriteString(w, strconv.Itoa(*rev))
 }

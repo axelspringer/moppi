@@ -28,7 +28,7 @@ Creates a new universe in KV.
         description: "Contains all the packages in developmen"
     }
 
-+ Response 200
++ Response 201
 
 ### List all universes [GET]
 
@@ -100,6 +100,8 @@ Creates a new Package if there is no package, or creates a new revision if thoug
         "install": {},
         "uninstall": {}
     }
+
++ Response 201
 
 ### List all Revisions [GET /packages/{package}]
 

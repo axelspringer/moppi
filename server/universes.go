@@ -57,7 +57,7 @@ func (server *Server) createUniverse(c web.C, w http.ResponseWriter, req *http.R
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 }
 
 // deleteUniverse is deleting a universe in the KV
