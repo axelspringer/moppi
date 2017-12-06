@@ -3,11 +3,37 @@
 [![Volkswagen](https://auchenberg.github.io/volkswagen/volkswargen_ci.svg?v=1)](https://github.com/auchenberg/volkswagen)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-# kombinat api
-
-A golang app created with `yo golang`.
+# :dizzy: Moppi
 
 > :construction_worker: This is work in progress and many things are subject to change
+
+> A golang app created with `yo golang`.
+
+This is a universe for Mesos, Marathon and Chronos in many different KVs. We currently use [etcd](https://coreos.com/etcd/), but we use [libkv](https://github.com/docker/libkv) and there do support many more KVs.
+
+## Docs
+
+You can find a full documentation of the API in `/docs` or [here](https://axelspringer.github.io/moppi/).
+
+## Config
+
+We support config files, Environment variables and config parameters for `moppi`.
+
+This is an example (`moppi.yaml`) config
+
+```yaml
+verbose: true
+setup: true
+etcd:
+  prefix: "/moppi"
+  endpoint: "localhost:2379"
+chronos: "https://localhost:8181/"
+marathon: "https://localhost:8080
+```
+
+### `--help` 
+
+Displays the available options for `moppi`.
 
 ## Publish a Package
 
