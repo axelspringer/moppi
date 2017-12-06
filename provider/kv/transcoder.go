@@ -97,7 +97,8 @@ func (t *Transcoder) transcode(name string, val reflect.Value) error {
 	// case reflect.Float32:
 	// 	err = t.transcodeFloat(name, val)
 	case reflect.Struct:
-		err = t.transcodeStruct(val)
+		err = t.transcodeStruct(name, val)
+	// doesnt make sense
 	// case reflect.Slice:
 	// 	err = t.transcodeSlice(name, val)
 	default:
@@ -135,7 +136,7 @@ func (t *Transcoder) transcodeFloat(name string, val reflect.Value) error {
 }
 
 // transdecodeStruct
-func (t *Transcoder) transcodeStruct(val reflect.Value) error {
+func (t *Transcoder) transcodeStruct(name string, val reflect.Value) error {
 	valInterface := reflect.Indirect(val)
 	valType := valInterface.Type()
 
@@ -179,13 +180,15 @@ func (t *Transcoder) transcodeStruct(val reflect.Value) error {
 	// evaluate all fields
 	for _, f := range fields {
 		field, val, isJSON := f.field, f.val, f.json
-		kv := field.Name
+		kv := strings.ToLower(field.Name)
 
 		tag := field.Tag.Get(t.config.TagName)
 		tag = strings.SplitN(tag, ",", 2)[0]
 		if tag != "" {
 			kv = tag
 		}
+
+		kv = strings.Join([]string{name, kv}, "/")
 
 		if !val.CanAddr() {
 			wg.Done()

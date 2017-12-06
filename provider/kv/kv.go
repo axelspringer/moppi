@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/axelspringer/moppi/provider"
+	"github.com/axelspringer/moppi/version"
 	"github.com/docker/libkv"
 	"github.com/docker/libkv/store"
 	"github.com/prometheus/common/log"
@@ -43,6 +44,35 @@ func (p *Provider) SetKVClient(kvClient store.Store) {
 func (p *Provider) Version() (*store.KVPair, error) {
 	ver, err := p.kvClient.Get(p.Prefix + provider.MoppiMetaVersion)
 	return ver, err
+}
+
+// Setup tries to setup moppi in a new kv
+func (p *Provider) Setup() (bool, error) {
+	if ok, _ := p.kvClient.Exists(p.Prefix); !ok {
+
+		// create config
+		meta := provider.Meta{
+			Version: version.Version,
+		}
+
+		cfg := &provider.Config{
+			Meta: &meta,
+		}
+
+		// Transcode
+		if err := Transcode(&cfg, p.Prefix, p.kvClient); err != nil {
+			return false, err
+		}
+
+		// create structure
+		for _, v := range []string{provider.MoppiUniverses, provider.MoppiPackages} {
+			if err := p.kvClient.Put(p.Prefix+v, []byte(""), &store.WriteOptions{IsDir: true}); err != nil {
+				return false, err
+			}
+		}
+	}
+
+	return true, nil
 }
 
 // GetPackage return a package

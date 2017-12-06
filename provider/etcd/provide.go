@@ -82,6 +82,11 @@ func (p *Provider) CheckVersion(moppiVersion string) (bool, error) {
 	return string(version.Value) == moppiVersion, nil
 }
 
+// Setup checks for the setup of the moppi repo
+func (p *Provider) Setup() (bool, error) {
+	return p.Provider.Setup()
+}
+
 // CreateStore creates the etcd store
 func (p *Provider) CreateStore(bucket string) (store.Store, error) {
 	p.SetStoreType(store.ETCD)

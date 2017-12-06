@@ -23,6 +23,7 @@ import (
 // Provider defines the interface to a Provider (e.g. etcd)
 type Provider interface {
 	Version() (*store.KVPair, error)
+	Setup() (bool, error)
 	CreateUniverse(u *Universe) error
 	GetUniverse(req *Request) (*Universe, error)
 	GetUniverses() (*Universes, error)
@@ -34,6 +35,16 @@ type Provider interface {
 
 // Version describes the version of a moppi installation
 type Version string
+
+// Meta
+type Meta struct {
+	Version string `kvstructure:"version"`
+}
+
+// Config
+type Config struct {
+	*Meta `kvstructure:"meta"`
+}
 
 // Universe describes a universe from endpoint /meta
 type Universe struct {

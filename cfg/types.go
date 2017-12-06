@@ -35,6 +35,7 @@ type CmdConfig struct {
 	Marathon  string
 	Mesos     string
 	Verbose   bool
+	Setup     bool
 	Zookeeper string
 	Etcd      etcd.Provider
 }
