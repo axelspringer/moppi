@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/coreos/etcd/version"
 	"github.com/rs/cors"
 	"github.com/zenazn/goji/web/middleware"
 
@@ -36,6 +37,12 @@ func New(config *cfg.Config) (*Server, error) {
 
 // mustNew wraps the creation of a new Server
 func mustNew(config *cfg.Config) (*Server, error) {
+
+	// check version of repo in provider
+	if ok, err := config.Etcd.CheckVersion(version.Version); !ok {
+		return nil, err
+	}
+
 	installer, err := installer.New(config)
 	if err != nil {
 		return nil, err

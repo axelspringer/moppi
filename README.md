@@ -35,6 +35,10 @@ marathon: "https://localhost:8080
 
 Displays the available options for `moppi`.
 
+### `init`
+
+Does initializes a KV for moppi.
+
 ## Publish a Package
 
 Each package has its own directory, with subdirectories for package revisions. Their package folder contains various files describing how to install, uninstall and configure it.

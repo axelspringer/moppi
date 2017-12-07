@@ -17,7 +17,6 @@ package cfg
 import (
 	"net"
 
-	"github.com/axelspringer/moppi/version"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -56,7 +55,6 @@ func mustNew(cmdCfg *CmdConfig) (*Config, error) {
 	cfg.Listener = listener
 	cfg.Marathon = cmdCfg.Marathon
 	cfg.Mesos = cmdCfg.Mesos
-	cfg.Setup = cmdCfg.Setup
 	cfg.Verbose = cmdCfg.Verbose
 	cfg.Zookeeper = cmdCfg.Zookeeper
 	cfg.Etcd = cmdCfg.Etcd
@@ -67,18 +65,6 @@ func mustNew(cmdCfg *CmdConfig) (*Config, error) {
 		cfg.Logger.Fatalf("Initializing provider: %v", err)
 	}
 	cfg.Etcd.SetKVClient(store)
-
-	// check for setup
-	if cfg.Setup {
-		if ok, err := cfg.Etcd.Setup(); !ok {
-			cfg.Logger.Fatalf("Initializing provider: %v", err)
-		}
-	}
-
-	// check version of repo in provider
-	if ok, err := cfg.Etcd.CheckVersion(version.Version); !ok {
-		cfg.Logger.Fatalf("Initializing provider: %v", err)
-	}
 
 	return &cfg, nil
 }

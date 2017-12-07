@@ -1,5 +1,4 @@
 verbose: true
-setup: true
 etcd:
   prefix: "/moppi"
   endpoint: "internal-kombinat-prod-managers-1778265914.eu-west-1.elb.amazonaws.com:2379"

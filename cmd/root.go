@@ -35,9 +35,9 @@ const (
 )
 
 var (
-	cfgFile  string
 	verbose  bool
 	config   *cfg.Config
+	cfgFile  string
 	listener string
 )
 
@@ -93,6 +93,9 @@ func init() {
 func addCommands(cmd *cobra.Command) {
 	// adding version command
 	cmd.AddCommand(version.NewCmd())
+
+	// adding init command
+	cmd.AddCommand(NewInitCmd())
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -149,7 +152,7 @@ func initConfig() {
 	config.Logger.Info("Configuration initialized")
 }
 
-// run is running an server is passing along config
+// run is running a server and is passing along the config
 func run(cmd *cobra.Command, args []string) {
 	server, err := server.New(config)
 	if err != nil {

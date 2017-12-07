@@ -12,34 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package version
+package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
-// NewCmd returns the new subcommand version
-func NewCmd() *cobra.Command {
+// NewInitCmd returns the new subcommand version
+func NewInitCmd() *cobra.Command {
 	// suprise, create a new version command
-	return mustNewCmd()
+	return mustNewInitCmd()
 }
 
 // mustNew wraps the creation of a new version cmd
-func mustNewCmd() *cobra.Command {
+func mustNewInitCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "version",
-		Short: "Print the version number of Moppi",
-		Long:  `All software has versions. This is Moppis`,
-		RunE:  runE,
+		Use:   "init",
+		Short: "Initializes Moppi in a support KV",
+		Long:  ``,
+		RunE:  runInitE,
 	}
 }
 
 // RunE is the function to be executed to run the command
-func runE(c *cobra.Command, args []string) error {
-	// print the version string
-	fmt.Println("v" + Version)
+func runInitE(c *cobra.Command, args []string) error {
+	if ok, err := config.Etcd.Setup(); !ok {
+		return err
+	}
 
 	// save for later
 	return nil
