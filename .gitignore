@@ -5,3 +5,5 @@ pkg
 # tools
 vendor
 debug
+
+/moppi.yml

@@ -15,6 +15,8 @@
 package etcd
 
 import (
+	"errors"
+
 	"github.com/axelspringer/moppi/provider"
 	"github.com/docker/libkv/store"
 	"github.com/docker/libkv/store/etcd"
@@ -79,7 +81,7 @@ func (p *Provider) CheckVersion(moppiVersion string) (bool, error) {
 		return false, err
 	}
 	// TODO: real error
-	return string(version.Value) == moppiVersion, nil
+	return string(version.Value) == moppiVersion, errors.New("Version not matching")
 }
 
 // Setup checks for the setup of the moppi repo

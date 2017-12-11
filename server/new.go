@@ -19,7 +19,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/coreos/etcd/version"
+	"github.com/axelspringer/moppi/version"
 	"github.com/rs/cors"
 	"github.com/zenazn/goji/web/middleware"
 

@@ -20,20 +20,21 @@ import (
 )
 
 // configSignals configures signals the server should listen to
-func (s *Server) configSignals() {
-	signal.Notify(s.signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1)
+func (server *Server) configSignals() {
+	signal.Notify(server.signals, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1)
 }
 
 // watchSignals is watching configured signals
-func (s *Server) watchSignals() {
+func (server *Server) watchSignals() {
+	log := server.log
 	for {
-		sig := <-s.signals
+		sig := <-server.signals
 		switch sig {
 		case syscall.SIGUSR1:
-			s.log.Infof("Nothing to see here yet")
+			log.Infof("Nothing to see here yet")
 		default:
-			s.log.Infof("Shutting gracefully down")
-			s.Stop()
+			log.Infof("Shutting gracefully down")
+			server.Stop()
 		}
 	}
 }

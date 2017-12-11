@@ -67,7 +67,7 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./moppi.yaml)")
+	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./moppi.yml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -80,7 +80,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&listener, "listen", "", defaultListener, "Bind listener to (Default: localhost:8080)")
 
 	// Some more specific flags
-	RootCmd.PersistentFlags().String("chronos", "", "List of Zookeepers")
+	RootCmd.PersistentFlags().String("chronos", "", "Chronos endpoints")
 	RootCmd.PersistentFlags().String("marathon", "", "Marathon Endpoint")
 	RootCmd.PersistentFlags().String("mesos", "", "Mesos Endpoint")
 	RootCmd.PersistentFlags().String("zookeeper", "", "List of Zookeepers")
@@ -102,6 +102,7 @@ func addCommands(cmd *cobra.Command) {
 func initConfig() {
 	var err error
 
+	// map all flags
 	for _, flags := range []*pflag.FlagSet{RootCmd.PersistentFlags()} {
 		err = viper.BindPFlags(flags)
 		if err != nil {
@@ -110,7 +111,7 @@ func initConfig() {
 	}
 
 	if cfgFile != "" {
-		// Use config file from the flag.
+		// Use config file from the command line flag
 		viper.SetConfigFile(cfgFile)
 	} else {
 		// Find home directory.

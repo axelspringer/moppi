@@ -19,11 +19,10 @@ You can find a full documentation of the API in `/docs` or [here](https://axelsp
 
 We support config files, Environment variables and config parameters for `moppi`.
 
-This is an example (`moppi.yaml`) config
+This is an example (`moppi.yml`) config
 
 ```yaml
 verbose: true
-setup: true
 etcd:
   prefix: "/moppi"
   endpoint: "localhost:2379"
