@@ -18,6 +18,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sync"
 
 	"github.com/axelspringer/moppi/version"
 	"github.com/rs/cors"
@@ -31,12 +32,12 @@ import (
 )
 
 // New returns a new instance of a Server
-func New(config *cfg.Config) (*Server, error) {
-	return mustNew(config)
+func New(config *cfg.Config, exit chan bool, wg *sync.WaitGroup) (*Server, error) {
+	return mustNew(config, exit, wg)
 }
 
 // mustNew wraps the creation of a new Server
-func mustNew(config *cfg.Config) (*Server, error) {
+func mustNew(config *cfg.Config, exit chan bool, wg *sync.WaitGroup) (*Server, error) {
 
 	// check version of repo in provider
 	if ok, err := config.Etcd.CheckVersion(version.Version); !ok {
@@ -59,6 +60,8 @@ func mustNew(config *cfg.Config) (*Server, error) {
 		signals:   signals,
 		provider:  config.Etcd,
 		queue:     queue,
+		exit:      exit,
+		wg:        wg,
 	}
 
 	return server, nil
@@ -130,9 +133,10 @@ func (server *Server) version(w http.ResponseWriter, req *http.Request) {
 
 // Start is starting to serve the api
 func (server *Server) Start() {
-	// setup signals
-	server.configSignals()
-	go server.watchSignals()
+	defer server.wg.Done()
+
+	// add to waiting group
+	server.wg.Add(1)
 
 	// cors, allow allow for now
 	c := cors.AllowAll()
@@ -164,6 +168,9 @@ func (server *Server) Start() {
 
 	// create server
 	goji.ServeListener(server.listener)
+
+	// wait for exit
+	<-server.exit
 }
 
 // Stop is stoping to serve the api

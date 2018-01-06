@@ -12,34 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package server
+package cfg
 
 import (
-	"net"
-	"os"
-	"sync"
-
-	"github.com/axelspringer/moppi/installer"
-
-	"github.com/axelspringer/moppi/provider/etcd"
-	"github.com/axelspringer/moppi/queue"
 	log "github.com/sirupsen/logrus"
 )
 
-// Server holds the state of a new Server
-type Server struct {
-	log       *log.Logger
-	signals   chan os.Signal
-	installer *installer.Installer
-	listener  net.Listener
-	provider  etcd.Provider
-	queue     queue.WorkQueue
-	exit      chan bool
-	wg        *sync.WaitGroup
-}
-
-// Error contains an error of the api
-type Error struct {
-	Msg string
-	Err string
-}
+var Log = log.New()

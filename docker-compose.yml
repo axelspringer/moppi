@@ -1,0 +1,18 @@
+version: "3.3"
+
+services:
+  etcd:
+    image: quay.io/coreos/etcd:v3.2
+    command: etcd --listen-client-urls http://0.0.0.0:2379 --initial-advertise-peer-urls http://0.0.0.0:2380 --initial-cluster default=http://0.0.0.0:2380 --advertise-client-urls http://0.0.0.0:2379
+    ports:
+      - target: 2379
+        published: 2379
+        protocol: tcp
+        mode: host
+    volumes:
+      - type: volume
+        source: etcd
+        target: /default.etcd
+
+volumes:
+  etcd:

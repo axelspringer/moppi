@@ -15,9 +15,9 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/axelspringer/moppi/cfg"
 	"github.com/axelspringer/moppi/server"
@@ -35,7 +35,13 @@ const (
 )
 
 var (
-	verbose  bool
+	exit     = make(chan bool, 1)
+	shutdown = make(chan bool, 1)
+	wg       sync.WaitGroup
+)
+
+var (
+	verbose  bool // make to new config
 	config   *cfg.Config
 	cfgFile  string
 	listener string
@@ -55,8 +61,7 @@ var RootCmd = &cobra.Command{
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		cfg.Log.Fatal(err)
 	}
 }
 
@@ -106,7 +111,7 @@ func initConfig() {
 	for _, flags := range []*pflag.FlagSet{RootCmd.PersistentFlags()} {
 		err = viper.BindPFlags(flags)
 		if err != nil {
-			log.WithField("error", err).Fatal("could not bind flags")
+			cfg.Log.WithField("error", err).Fatal("could not bind flags")
 		}
 	}
 
@@ -119,8 +124,7 @@ func initConfig() {
 		// find current directory
 		dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 		if err != nil {
-			log.Fatalf("Could not find current directory: %v", err)
-			os.Exit(-1)
+			cfg.Log.WithError(err).Fatal("Could not find current directory")
 		}
 
 		// Search config in home directory with name "config" (without extension).
@@ -134,31 +138,47 @@ func initConfig() {
 	// If a config file is found, read it in.
 	err = viper.ReadInConfig()
 	if err == nil && verbose {
-		log.Infof("Using config file:", viper.ConfigFileUsed())
+		cfg.Log.Infof("Using config file:", viper.ConfigFileUsed())
 	}
 
 	// Decode command config
 	var cmdCfg cfg.CmdConfig
 	if err = viper.Unmarshal(&cmdCfg); err != nil {
-		log.Fatalf("Unable to decode into config:, %v", err)
+		cfg.Log.WithError(err).Fatal("Unable to decode into config")
 	}
 
 	config, err = cfg.New(&cmdCfg)
 	if err != nil {
 		// should be substitued with general errors, and string functions
-		log.Fatalf("Failed to create config: %v", err)
+		cfg.Log.WithError(err).Fatal("Unable to decode into config")
+	}
+
+	cfg.Log.SetLevel(log.InfoLevel) // the standard log level is info
+	if config.Verbose {             // if verbose extend log level to debug
+		cfg.Log.SetLevel(log.DebugLevel)
 	}
 
 	// only log, when verbose is enabled
-	config.Logger.Info("Configuration initialized")
+	cfg.Log.Info("Configuration initialized")
 }
 
 // run is running a server and is passing along the config
 func run(cmd *cobra.Command, args []string) {
-	server, err := server.New(config)
+	var err error // handle error
+
+	// watch relevant syscalls
+	go watchdog()
+
+	// create server
+	server, err := server.New(config, exit, &wg)
 	if err != nil {
-		log.Fatalf("Failed to create server: %v", err)
+		cfg.Log.Errorf("Failed to create server: %v", err)
+		waitGracefulShutdown()
 	}
 
-	server.Start()
+	// start server
+	go server.Start()
+
+	// wait for graceful shutdown
+	<-shutdown
 }
