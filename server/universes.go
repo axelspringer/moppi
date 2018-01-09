@@ -51,6 +51,12 @@ func (server *Server) createUniverse(c web.C, w http.ResponseWriter, req *http.R
 		return
 	}
 
+	err = server.validator.Struct(universe)
+	if err != nil {
+		writeErrorJSON(w, "Could not create a new universe", http.StatusBadRequest, err)
+		return
+	}
+
 	err = server.provider.CreateUniverse(&universe)
 	if err != nil {
 		writeErrorJSON(w, "Could not create a new universe", http.StatusBadGateway, err)

@@ -48,11 +48,10 @@ type Config struct {
 
 // Universe describes a universe from endpoint /meta
 type Universe struct {
-	Description string `kvstructure:"description" json:"description"`
-	Name        string `kvstructure:"name" json:"name"`
-	Version     string `kvstructure:"version" json:"version"`
-	Test        int    `kvstructure:"test" json:"test"`
-	Href        string `json:"href"`
+	Description string `kvstructure:"description" json:"description" validate:"required,min=1"`
+	Name        string `kvstructure:"name" json:"name" validate:"required,min=1"`
+	Version     string `kvstructure:"version" json:"version" validate:"required"`
+	Href        string `json:"href" validate:"required,min=1"`
 }
 
 // AbstractProvider is the base provider from which every provider inherits

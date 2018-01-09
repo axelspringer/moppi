@@ -20,6 +20,12 @@
   revision = "3723994a31242f60ecd2ebc1d8c7a8740b660a5b"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/axelspringer/pitti"
+  packages = ["cfg","mesos","mesos/encoding","mesos/encoding/codecs","mesos/encoding/framing","mesos/encoding/json","mesos/encoding/proto"]
+  revision = "63a511f35a8c8a70049456f73f09dc4ceb55d115"
+
+[[projects]]
   name = "github.com/coreos/etcd"
   packages = ["client","pkg/pathutil","pkg/srv","pkg/types","version"]
   revision = "f1d7dd87da3e8feab4aaf675b8e29c6a5ed5f58b"
@@ -60,6 +66,24 @@
   packages = ["."]
   revision = "6b00a5b651b1beb2c6821863f7c60df490bd46c8"
   version = "v0.7.1"
+
+[[projects]]
+  name = "github.com/go-playground/locales"
+  packages = [".","currency"]
+  revision = "e4cbcb5d0652150d40ad0646651076b6bd2be4f6"
+  version = "v0.11.2"
+
+[[projects]]
+  name = "github.com/go-playground/universal-translator"
+  packages = ["."]
+  revision = "b32fa301c9fe55953584134cb6853a13c87ec0a1"
+  version = "v0.16.0"
+
+[[projects]]
+  name = "github.com/gogo/protobuf"
+  packages = ["gogoproto","proto","protoc-gen-gogo/descriptor"]
+  revision = "342cbe0a04158f6dcb03ca0079991a51a4248c02"
+  version = "v0.5"
 
 [[projects]]
   branch = "master"
@@ -108,6 +132,12 @@
   packages = ["."]
   revision = "16398bac157da96aa88f98a2df640c7f32af1da2"
   version = "v1.0.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/pquerna/ffjson"
+  packages = ["fflib/v1","fflib/v1/internal"]
+  revision = "d49c2bc1aa135aad0c6f4fc2056623ec78f5d5ac"
 
 [[projects]]
   branch = "master"
@@ -206,6 +236,12 @@
   version = "v2.2.5"
 
 [[projects]]
+  name = "gopkg.in/go-playground/validator.v9"
+  packages = ["."]
+  revision = "230db62e071d40171640c9deb875d46a3858d9dd"
+  version = "v9.9.2"
+
+[[projects]]
   branch = "v2"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -214,6 +250,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "990f2385ff35e0e57f14952192a065a82b28c054ddad35041dd1446844d4d0e4"
+  inputs-digest = "4c7a15e2d07d692aa20f8211e92b9445ef78bc4e3467a13a6fd2788d32a834a0"
   solver-name = "gps-cdcl"
   solver-version = 1

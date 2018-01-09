@@ -23,6 +23,7 @@ import (
 	"github.com/axelspringer/moppi/version"
 	"github.com/rs/cors"
 	"github.com/zenazn/goji/web/middleware"
+	validator "gopkg.in/go-playground/validator.v9"
 
 	"github.com/axelspringer/moppi/cfg"
 	"github.com/axelspringer/moppi/installer"
@@ -38,6 +39,7 @@ func New(config *cfg.Config, exit chan bool, wg *sync.WaitGroup) (*Server, error
 
 // mustNew wraps the creation of a new Server
 func mustNew(config *cfg.Config, exit chan bool, wg *sync.WaitGroup) (*Server, error) {
+	var validate *validator.Validate
 
 	// check version of repo in provider
 	if ok, err := config.Etcd.CheckVersion(version.Version); !ok {
@@ -52,6 +54,8 @@ func mustNew(config *cfg.Config, exit chan bool, wg *sync.WaitGroup) (*Server, e
 	queue := queue.New(1)
 	signals := make(chan os.Signal, 1)
 
+	validate = validator.New()
+
 	// server config
 	server := &Server{
 		listener:  config.Listener,
@@ -61,6 +65,7 @@ func mustNew(config *cfg.Config, exit chan bool, wg *sync.WaitGroup) (*Server, e
 		provider:  config.Etcd,
 		queue:     queue,
 		exit:      exit,
+		validator: validate,
 		wg:        wg,
 	}
 
