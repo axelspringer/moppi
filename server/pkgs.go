@@ -121,6 +121,12 @@ func (server *Server) createPkgRevision(c web.C, w http.ResponseWriter, req *htt
 		return
 	}
 
+	err = server.validator.Struct(pkg)
+	if err != nil {
+		writeErrorJSON(w, "Could not create a new universe", http.StatusBadRequest, err)
+		return
+	}
+
 	// create new revision
 	rev, err := server.provider.CreatePackageRevision(&pkgRequest, &pkg)
 	if err != nil {

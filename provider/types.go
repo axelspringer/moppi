@@ -51,7 +51,7 @@ type Universe struct {
 	Description string `kvstructure:"description" json:"description" validate:"required,min=1"`
 	Name        string `kvstructure:"name" json:"name" validate:"required,min=1"`
 	Version     string `kvstructure:"version" json:"version" validate:"required"`
-	Href        string `json:"href" validate:"required,min=1"`
+	Href        string `json:"href"`
 }
 
 // AbstractProvider is the base provider from which every provider inherits
@@ -73,10 +73,10 @@ type Request struct {
 
 // Package describes a package in the universe
 type Package struct {
-	Chronos   []chronos.Job          `kvstructure:"chronos,json" json:"chronos"`
-	Marathon  []marathon.Application `kvstructure:"marathon,json" json:"marathon"`
-	Install   Install                `kvstructure:"install,json" json:"install"`
-	Uninstall Uninstall              `kvstructure:"uninstall,json" json:"uninstall"`
+	Chronos   []chronos.Job          `kvstructure:"chronos,json" json:"chronos" validate:"required"`
+	Marathon  []marathon.Application `kvstructure:"marathon,json" json:"marathon" validate:"required"`
+	Install   Install                `kvstructure:"install,json" json:"install" validate:"required"`
+	Uninstall Uninstall              `kvstructure:"uninstall,json" json:"uninstall" validate:"required"`
 }
 
 // Install describes an installment (contained in install.json)

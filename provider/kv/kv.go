@@ -27,6 +27,7 @@ import (
 	"github.com/axelspringer/moppi/version"
 	"github.com/docker/libkv"
 	"github.com/docker/libkv/store"
+	"github.com/katallaxie/kvstructure"
 	"github.com/prometheus/common/log"
 )
 
@@ -60,7 +61,7 @@ func (p *Provider) Setup() (bool, error) {
 		}
 
 		// Transcode
-		if err := Transcode(&cfg, p.Prefix, p.kvClient); err != nil {
+		if err := kvstructure.Transcode(&cfg, p.Prefix, p.kvClient); err != nil {
 			return false, err
 		}
 
@@ -80,7 +81,7 @@ func (p *Provider) GetPackage(req *provider.Request) (*provider.Package, error) 
 	path := universePkgPath(p.Prefix, req.Universe, req.Name, req.Revision)
 	var pkg provider.Package
 
-	if err := Transdecode(&pkg, path, p.kvClient); err != nil {
+	if err := kvstructure.Transdecode(&pkg, path, p.kvClient); err != nil {
 		return &pkg, err
 	}
 
@@ -129,7 +130,7 @@ func (p *Provider) GetRevisions(req *provider.Request) (*provider.PackageRevisio
 func (p *Provider) CreateUniverse(u *provider.Universe) error {
 	path := universeMetaPath(p.Prefix, strings.ToLower(u.Name))
 
-	return Transcode(&u, path, p.kvClient)
+	return kvstructure.Transcode(&u, path, p.kvClient)
 }
 
 // DeleteUniverse deletes a universe
@@ -160,7 +161,7 @@ func (p *Provider) CreatePackageRevision(req *provider.Request, pkg *provider.Pa
 		revPath := universePkgPath(p.Prefix, req.Universe, req.Name, fmt.Sprint(rev))
 
 		// Transcode
-		if err := Transcode(&pkg, revPath, p.kvClient); err != nil {
+		if err := kvstructure.Transcode(&pkg, revPath, p.kvClient); err != nil {
 			return nil, err
 		}
 
@@ -183,7 +184,7 @@ func (p *Provider) CreatePackageRevision(req *provider.Request, pkg *provider.Pa
 	revPath := universePkgPath(p.Prefix, req.Universe, req.Name, fmt.Sprint(rev+1))
 
 	// Transcode
-	if err := Transcode(&pkg, revPath, p.kvClient); err != nil {
+	if err := kvstructure.Transcode(&pkg, revPath, p.kvClient); err != nil {
 		return nil, err
 	}
 
@@ -212,7 +213,7 @@ func (p *Provider) GetUniverses() (*provider.Universes, error) {
 		universePath := kvUniverse.Key + provider.MoppiUniversesMeta
 		var universe provider.Universe
 
-		err := Transdecode(&universe, universePath, p.kvClient)
+		err := kvstructure.Transdecode(&universe, universePath, p.kvClient)
 		if err != nil {
 			return &universes, err
 		}
@@ -229,7 +230,7 @@ func (p *Provider) GetUniverse(req *provider.Request) (*provider.Universe, error
 	path := universeMetaPath(p.Prefix, req.Universe)
 	var universe provider.Universe
 
-	if err := Transdecode(&universe, path, p.kvClient); err != nil {
+	if err := kvstructure.Transdecode(&universe, path, p.kvClient); err != nil {
 		return &universe, err
 	}
 

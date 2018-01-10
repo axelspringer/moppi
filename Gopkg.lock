@@ -104,6 +104,12 @@
   version = "v1.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/katallaxie/kvstructure"
+  packages = ["."]
+  revision = "6af45c34c557e5ed419aec4c6234a3863e374a55"
+
+[[projects]]
   name = "github.com/magiconair/properties"
   packages = ["."]
   revision = "be5ece7dd465ab0765a9682137865547526d1dfb"
@@ -250,6 +256,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4c7a15e2d07d692aa20f8211e92b9445ef78bc4e3467a13a6fd2788d32a834a0"
+  inputs-digest = "c11fb3f92a1396cbe342b4857da8aa25683eb039b48719182e1e8772b1230bd9"
   solver-name = "gps-cdcl"
   solver-version = 1
