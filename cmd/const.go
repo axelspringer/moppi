@@ -12,7 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package version
+package cmd
 
-// Version exports the current version of the app
-const Version = "0.0.1"
+const (
+	versionShort = "Print the version number of Moppi"
+	versionLong  = `All software has versions. This is Moppis`
+	versionCmd   = "version"
+	version      = "0.0.1"
+	setupShort   = "Runs the Moppi Setup"
+	setupLong    = ``
+	setupCmd     = "setup"
+)

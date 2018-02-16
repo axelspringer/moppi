@@ -23,7 +23,6 @@ import (
 	"github.com/axelspringer/moppi/server"
 	"github.com/spf13/pflag"
 
-	"github.com/axelspringer/moppi/version"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -97,10 +96,10 @@ func init() {
 // addCommand is adding and initializing additional commands to the rootCmd
 func addCommands(cmd *cobra.Command) {
 	// adding version command
-	cmd.AddCommand(version.NewCmd())
+	cmd.AddCommand(newVersionCmd())
 
-	// adding init command
-	cmd.AddCommand(NewInitCmd())
+	// adding setup command
+	cmd.AddCommand(newSetupCmd())
 }
 
 // initConfig reads in config file and ENV variables if set.

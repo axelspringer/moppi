@@ -20,7 +20,6 @@ import (
 	"os"
 	"sync"
 
-	"github.com/axelspringer/moppi/version"
 	"github.com/rs/cors"
 	"github.com/zenazn/goji/web/middleware"
 	validator "gopkg.in/go-playground/validator.v9"

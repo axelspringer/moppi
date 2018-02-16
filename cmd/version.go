@@ -12,4 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package version
+package cmd
+
+import (
+	"fmt"
+
+	"github.com/spf13/cobra"
+)
+
+// newVersionCmd returns a new version command
+func newVersionCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "version",
+		Short: "Print the version number of Moppi",
+		Long:  `All software has versions. This is Moppis`,
+		RunE:  runVersionE,
+	}
+}
+
+// runVersionE prints the current version of Moppi
+func runVersionE(c *cobra.Command, args []string) error {
+	// print the version string
+	fmt.Println("v" + Version)
+
+	return nil // noop
+}

@@ -24,7 +24,6 @@ import (
 	"strings"
 
 	"github.com/axelspringer/moppi/provider"
-	"github.com/axelspringer/moppi/version"
 	"github.com/docker/libkv"
 	"github.com/docker/libkv/store"
 	"github.com/katallaxie/kvstructure"
@@ -52,12 +51,12 @@ func (p *Provider) Setup() (bool, error) {
 	if ok, _ := p.kvClient.Exists(p.Prefix); !ok {
 
 		// create config
-		meta := provider.Meta{
-			Version: version.Version,
-		}
+		// meta := provider.Meta{
+		// 	Version: version.Version,
+		// }
 
 		cfg := &provider.Config{
-			Meta: &meta,
+		// Meta: &meta,
 		}
 
 		// Transcode
