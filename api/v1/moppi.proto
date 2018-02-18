@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package moppi.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/axelspringer/moppi/api/v1;moppi";
+
+/**
+ * A universe.
+ */
+message Universe {
+    string id = 1;
+    string version = 2;
+    string description = 3;
+}
+
+message GetUniverseRequest {
+    string id = 1;
+}
+
+// Description string `kvstructure:"description" json:"description" validate:"required,min=1"`
+// 	Name        string `kvstructure:"name" json:"name" validate:"required,min=1"`
+// 	Version     string `kvstructure:"version" json:"version" validate:"required"`
+// 	Href        string `json:"href"`
+
+// Name     string        `json:"name"`
+// 	Universe string        `json:"universe"`
+// 	Revision string        `json:"revision"`
+// 	Config   RequestConfig `json:"config"`
+
+service Universes {
+    rpc GetUniverse(GetUniverseRequest) returns (Universe) {
+        option (google.api.http) = {
+            get: "/v1/universe/{id}"
+        };
+    }
+}

@@ -1,6 +1,8 @@
 # dist
 bin
 pkg
+*.pb.go
+*.gw.go
 
 # tools
 vendor

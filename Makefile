@@ -22,6 +22,11 @@ deps:
 	go get -u github.com/golang/dep/cmd/dep
 	go get -u github.com/onsi/gomega
 	go get -u github.com/onsi/ginkgo/ginkgo
+	go get -u github.com/gogo/protobuf/proto
+	go get -u github.com/gogo/protobuf/protoc-gen-gogo
+	go get -u github.com/gogo/protobuf/gogoproto
+	go get -u github.com/gengo/grpc-gateway/protoc-gen-grpc-gateway
+	go get -u github.com/gengo/grpc-gateway/protoc-gen-swagger
 
 build:
 	@echo "Compiling..."
@@ -29,6 +34,16 @@ build:
 	@gox -output "bin/{{.Dir}}_${VERSION}_{{.OS}}_{{.Arch}}" -os="linux" -os="darwin" -arch="386" -arch="amd64" ./
 	@go build -i -o ./bin/moppi
 	@echo "All done! The binaries is in ./bin let's have fun!"
+
+build/proto:
+	for d in api; do \
+		for f in $$d/**/*.proto; do \
+			protoc -I. -I$(GOPATH)/src/github.com/gengo/grpc-gateway/third_party/googleapis --proto_path=vendor:. --gogo_out=Mgoogle/api/annotations.proto=github.com/gengo/grpc-gateway/third_party/googleapis/google/api,plugins=grpc:$(GOPATH)/src $$f; \
+			protoc -I. -I$(GOPATH)/src/github.com/gengo/grpc-gateway/third_party/googleapis --grpc-gateway_out=logtostderr=true:$(GOPATH)/src $$f; \
+			echo compiled: $$f; \
+		done \
+	done
+	
 
 build/docker: build
 	@docker build -t moppi:latest .
