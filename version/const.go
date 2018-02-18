@@ -12,13 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmd
+package version
 
 const (
-	versionShort = "Print the version number of Moppi"
-	versionLong  = `All software has versions. This is Moppis`
-	versionCmd   = "version"
-	setupShort   = "Runs the Moppi Setup"
-	setupLong    = ``
-	setupCmd     = "setup"
+	// Version is the current version
+	Version = "0.0.1"
 )

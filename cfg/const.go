@@ -15,5 +15,5 @@
 package cfg
 
 const (
-	DefaultBucket = "moppi"
+	defaultBucket = "moppi"
 )

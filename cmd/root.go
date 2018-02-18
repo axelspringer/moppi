@@ -141,20 +141,19 @@ func initConfig() {
 	}
 
 	// Decode command config
-	var cmdCfg cfg.CmdConfig
-	if err = viper.Unmarshal(&cmdCfg); err != nil {
-		cfg.Log.WithError(err).Fatal("Unable to decode into config")
-	}
-
-	config, err = cfg.New(&cmdCfg)
-	if err != nil {
-		// should be substitued with general errors, and string functions
+	config, err = cfg.New()
+	if err = viper.Unmarshal(&config); err != nil {
 		cfg.Log.WithError(err).Fatal("Unable to decode into config")
 	}
 
 	cfg.Log.SetLevel(log.InfoLevel) // the standard log level is info
 	if config.Verbose {             // if verbose extend log level to debug
 		cfg.Log.SetLevel(log.DebugLevel)
+	}
+
+	// init provider
+	if err = config.Init(); err != nil {
+		cfg.Log.WithError(err).Fatal("Unable to init KV provider")
 	}
 
 	// only log, when verbose is enabled

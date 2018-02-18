@@ -14,57 +14,19 @@
 
 package cfg
 
-import (
-	"net"
+// New returns a new Config
+func New() (*Config, error) {
+	// config
+	var cfg = new(Config)
 
-	log "github.com/sirupsen/logrus"
-)
-
-// New returns a new config
-// cmdCfg: is a CmdConfig that is used to create a config
-func New(cmdCfg *CmdConfig) (*Config, error) {
-	return mustNew(cmdCfg)
+	return cfg, nil // noop
 }
 
-// mustNew wraps the creation of a new config
-func mustNew(cmdCfg *CmdConfig) (*Config, error) {
-	// config
-	var cfg Config
-
-	// check for logger
-	cfg.Logger = cmdCfg.Logger
-	if cfg.Logger == nil {
-		cfg.Logger = log.New()
-		// this is the standard setting
-		cfg.Logger.SetLevel(log.WarnLevel)
-		if cmdCfg.Verbose {
-			cfg.Logger.SetLevel(log.DebugLevel)
-		}
-	}
-
-	// create listener
-	listener, err := net.Listen("tcp", cmdCfg.Listen)
-	if err != nil {
-		return nil, err
-	}
-	cfg.Listener = listener
-
-	// map additional values
-	cfg.Chronos = cmdCfg.Chronos
-	cfg.Listen = cmdCfg.Listen
-	cfg.Listener = listener
-	cfg.Marathon = cmdCfg.Marathon
-	cfg.Mesos = cmdCfg.Mesos
-	cfg.Verbose = cmdCfg.Verbose
-	cfg.Zookeeper = cmdCfg.Zookeeper
-	cfg.Etcd = cmdCfg.Etcd
-
+func (c *Config) Init() {
 	// initialize provider
-	store, err := cfg.Etcd.CreateStore(DefaultBucket)
+	store, err := c.Etcd.CreateStore(defaultBucket)
 	if err != nil {
-		cfg.Logger.Fatalf("Initializing provider: %v", err)
+		Log.Fatalf("Initializing provider: %v", err)
 	}
-	cfg.Etcd.SetKVClient(store)
-
-	return &cfg, nil
+	c.Etcd.SetKVClient(store)
 }

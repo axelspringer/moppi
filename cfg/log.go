@@ -18,4 +18,5 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Log exposes an instance of logrus logger
 var Log = log.New()

@@ -27,6 +27,7 @@ import (
 	"github.com/axelspringer/moppi/cfg"
 	"github.com/axelspringer/moppi/installer"
 	"github.com/axelspringer/moppi/queue"
+	"github.com/axelspringer/moppi/version"
 	"github.com/zenazn/goji"
 	"github.com/zenazn/goji/web"
 )
@@ -59,7 +60,6 @@ func mustNew(config *cfg.Config, exit chan bool, wg *sync.WaitGroup) (*Server, e
 	server := &Server{
 		listener:  config.Listener,
 		installer: installer,
-		log:       config.Logger,
 		signals:   signals,
 		provider:  config.Etcd,
 		queue:     queue,

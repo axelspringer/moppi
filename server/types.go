@@ -23,13 +23,11 @@ import (
 
 	"github.com/axelspringer/moppi/provider/etcd"
 	"github.com/axelspringer/moppi/queue"
-	log "github.com/sirupsen/logrus"
 	validator "gopkg.in/go-playground/validator.v9"
 )
 
 // Server holds the state of a new Server
 type Server struct {
-	log       *log.Logger
 	signals   chan os.Signal
 	installer *installer.Installer
 	listener  net.Listener

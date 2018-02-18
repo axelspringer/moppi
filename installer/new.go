@@ -25,11 +25,6 @@ import (
 
 // New is creates a new installer
 func New(config *cfg.Config) (*Installer, error) {
-	return mustNew(config)
-}
-
-// mustNew wraps the creation of a new installer
-func mustNew(config *cfg.Config) (*Installer, error) {
 	// create new Marathon client
 	marathonConfig := marathon.NewDefaultConfig()
 	marathonConfig.URL = config.Marathon
@@ -48,7 +43,7 @@ func mustNew(config *cfg.Config) (*Installer, error) {
 	// creating installer
 	installer := &Installer{
 		Chronos:  chronosClient,
-		Log:      config.Logger,
+		Log:      cfg.Log,
 		Marathon: marathonClient,
 		Mesos:    mesosClient,
 	}

@@ -17,6 +17,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/axelspringer/moppi/version"
 	"github.com/spf13/cobra"
 )
 
@@ -33,7 +34,7 @@ func newVersionCmd() *cobra.Command {
 // runVersionE prints the current version of Moppi
 func runVersionE(c *cobra.Command, args []string) error {
 	// print the version string
-	fmt.Println("v" + Version)
+	fmt.Println("v" + version.Version)
 
 	return nil // noop
 }

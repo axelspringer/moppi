@@ -1,6 +1,6 @@
 PACKAGES=$(shell go list ./... | grep -v /vendor/)
 RACE := $(shell test $$(go env GOARCH) != "amd64" || (echo "-race"))
-VERSION := $(shell grep "version " cmd/const.go | sed -E 's/.*"(.+)"$$/\1/')
+VERSION := $(shell grep "Version " version/const.go | sed -E 's/.*"(.+)"$$/\1/')
 
 help:
 	@echo 'Available commands:'

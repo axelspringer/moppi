@@ -17,6 +17,8 @@ package server
 import (
 	"os/signal"
 	"syscall"
+
+	"github.com/axelspringer/moppi/cfg"
 )
 
 // configSignals configures signals the server should listen to
@@ -26,7 +28,7 @@ func (server *Server) configSignals() {
 
 // watchSignals is watching configured signals
 func (server *Server) watchSignals() {
-	log := server.log
+	log := cfg.Log
 	for {
 		sig := <-server.signals
 		switch sig {
