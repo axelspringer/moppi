@@ -15,8 +15,10 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
@@ -24,6 +26,7 @@ import (
 	pb "github.com/axelspringer/moppi/api/v1"
 	"github.com/axelspringer/moppi/cfg"
 	"github.com/axelspringer/moppi/server"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/pflag"
 	"google.golang.org/grpc"
 
@@ -158,7 +161,7 @@ func initConfig() {
 	// init provider
 	config.Init()
 
-	// listenAddr := "localhost:8080"
+	listenAddr := "localhost:8080"
 	grpcServer := grpc.NewServer()
 	pb.RegisterUniversesServer(grpcServer, server.NewServer())
 	grpcLis, err := net.Listen("tcp", "localhost:")
@@ -173,6 +176,37 @@ func initConfig() {
 			panic(err)
 		}
 	}()
+
+	mux := http.NewServeMux()
+	// Start the REST gateway service, connecting to the gRPC server
+	gwmux := runtime.NewServeMux()
+	ctx := context.Background()
+	dopts := []grpc.DialOption{grpc.WithInsecure()}
+	err = pb.RegisterUniversesHandlerFromEndpoint(ctx, gwmux, grpcLis.Addr().String(), dopts)
+	if err != nil {
+		fmt.Printf("serve: %v\n", err)
+		return
+	}
+	mux.Handle("/", gwmux)
+
+	httpLis, err := net.Listen("tcp", listenAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	srv := &http.Server{
+		Addr:    listenAddr,
+		Handler: mux,
+	}
+
+	fmt.Printf("Starting http server on %s\n", listenAddr)
+	err = srv.Serve(httpLis)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
+
+	wg.Add(1)
+	wg.Wait()
 
 	// only log, when verbose is enabled
 	cfg.Log.Info("Configuration initialized")
