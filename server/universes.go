@@ -15,12 +15,26 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
+	pb "github.com/axelspringer/moppi/api/v1"
 	"github.com/axelspringer/moppi/provider"
 	"github.com/zenazn/goji/web"
 )
+
+func NewServer() *Server {
+	return &Server{}
+}
+
+func (server *Server) GetUniverse(ctx context.Context, req *pb.GetUniverseRequest) (*pb.Universe, error) {
+	return &pb.Universe{
+		Id:          "test",
+		Version:     "0.0.1",
+		Description: "lala",
+	}, nil
+}
 
 func (server *Server) getUniverse(c web.C, w http.ResponseWriter, _ *http.Request) {
 	var pkgRequest provider.Request

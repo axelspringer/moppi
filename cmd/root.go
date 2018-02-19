@@ -15,13 +15,17 @@
 package cmd
 
 import (
+	"fmt"
+	"net"
 	"os"
 	"path/filepath"
 	"sync"
 
+	pb "github.com/axelspringer/moppi/api/v1"
 	"github.com/axelspringer/moppi/cfg"
 	"github.com/axelspringer/moppi/server"
 	"github.com/spf13/pflag"
+	"google.golang.org/grpc"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -152,9 +156,23 @@ func initConfig() {
 	}
 
 	// init provider
-	if err = config.Init(); err != nil {
-		cfg.Log.WithError(err).Fatal("Unable to init KV provider")
+	config.Init()
+
+	// listenAddr := "localhost:8080"
+	grpcServer := grpc.NewServer()
+	pb.RegisterUniversesServer(grpcServer, server.NewServer())
+	grpcLis, err := net.Listen("tcp", "localhost:")
+	if err != nil {
+		panic(err)
 	}
+
+	go func() {
+		fmt.Printf("Starting gRPC server on %s\n", grpcLis.Addr().String())
+		err := grpcServer.Serve(grpcLis)
+		if err != nil {
+			panic(err)
+		}
+	}()
 
 	// only log, when verbose is enabled
 	cfg.Log.Info("Configuration initialized")

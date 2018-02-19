@@ -47,3 +47,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/katallaxie/kvstructure"
+
+[[constraint]]
+  name = "github.com/gengo/grpc-gateway"
+  version = "1.1.0"
