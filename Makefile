@@ -25,8 +25,8 @@ deps:
 	go get -u github.com/gogo/protobuf/proto
 	go get -u github.com/gogo/protobuf/protoc-gen-gogo
 	go get -u github.com/gogo/protobuf/gogoproto
-	go get -u github.com/gengo/grpc-gateway/protoc-gen-grpc-gateway
-	go get -u github.com/gengo/grpc-gateway/protoc-gen-swagger
+	go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+	go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger
 
 build:
 	@echo "Compiling..."
@@ -38,8 +38,8 @@ build:
 build/proto:
 	for d in api; do \
 		for f in $$d/**/*.proto; do \
-			protoc -I. -I$(GOPATH)/src/github.com/gengo/grpc-gateway/third_party/googleapis --proto_path=vendor:. --gogo_out=Mgoogle/api/annotations.proto=github.com/gengo/grpc-g/third_party/gatewayoogleapis/google/api,plugins=grpc:$(GOPATH)/src $$f; \
-			protoc -I. -I$(GOPATH)/src/github.com/gengo/grpc-gateway/third_party/googleapis --grpc-gateway_out=logtostderr=true:$(GOPATH)/src $$f; \
+			protoc -I. -I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis --proto_path=vendor:. --gogo_out=plugins=grpc:$(GOPATH)/src $$f; \
+			protoc -I. -I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis --grpc-gateway_out=logtostderr=true:$(GOPATH)/src $$f; \
 			echo compiled: $$f; \
 		done \
 	done

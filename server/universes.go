@@ -28,10 +28,10 @@ func NewServer() *Server {
 	return &Server{}
 }
 
-func (server *Server) GetUniverse(ctx context.Context, req *pb.GetUniverseRequest) (*pb.Universe, error) {
+func (server *Server) GetUniverse(ctx context.Context, req *pb.PackageRequest) (*pb.Universe, error) {
 	return &pb.Universe{
 		Id:          "test",
-		Version:     "0.0.1",
+		Version:     req.Id,
 		Description: "lala",
 	}, nil
 }

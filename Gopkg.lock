@@ -89,12 +89,6 @@
   version = "v0.7.1"
 
 [[projects]]
-  name = "github.com/gengo/grpc-gateway"
-  packages = ["third_party/googleapis/google/api"]
-  revision = "a8f25bd1ab549f8b87afd48aa9181221e9d439bb"
-  version = "v1.1.0"
-
-[[projects]]
   name = "github.com/go-playground/locales"
   packages = [
     ".",
@@ -124,7 +118,6 @@
   packages = [
     "jsonpb",
     "proto",
-    "protoc-gen-go/descriptor",
     "ptypes",
     "ptypes/any",
     "ptypes/duration",
@@ -139,16 +132,6 @@
   name = "github.com/google/go-querystring"
   packages = ["query"]
   revision = "53e6ce116135b80d037921a7fdd5138cf32d7a8a"
-
-[[projects]]
-  name = "github.com/grpc-ecosystem/grpc-gateway"
-  packages = [
-    "runtime",
-    "runtime/internal",
-    "utilities"
-  ]
-  revision = "07f5e79768022f9a3265235f0db4ac8c3f675fec"
-  version = "v1.3.1"
 
 [[projects]]
   branch = "master"
@@ -438,8 +421,8 @@
 [[projects]]
   name = "gopkg.in/go-playground/validator.v9"
   packages = ["."]
-  revision = "535f85221eb67ab842438877b22cac6274380cf2"
-  version = "v9.10.0"
+  revision = "150fe5b6a4ccc9cd6ffdbf5d184b67fbea75efcc"
+  version = "v9.11.0"
 
 [[projects]]
   branch = "v2"
@@ -450,6 +433,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8352cef59b62c13d7ff6c659eaf99b0abb87dc8f6e54ca4c8c716bedcf0eed41"
+  inputs-digest = "499cc4ff54d9e7448e5f182942be4b4d0823bdd9d3180e9e041a3f5448f8da0b"
   solver-name = "gps-cdcl"
   solver-version = 1
