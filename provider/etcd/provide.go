@@ -17,6 +17,7 @@ package etcd
 import (
 	"errors"
 
+	pb "github.com/axelspringer/moppi/api/v1"
 	"github.com/axelspringer/moppi/provider"
 	"github.com/docker/libkv/store"
 	"github.com/docker/libkv/store/etcd"
@@ -65,7 +66,7 @@ func (p *Provider) Version() (*store.KVPair, error) {
 }
 
 // GetUniverse gets the meta info of a universe
-func (p *Provider) GetUniverse(req *provider.Request) (*provider.Universe, error) {
+func (p *Provider) GetUniverse(req *pb.PackageRequest) (*pb.Universe, error) {
 	return p.Provider.GetUniverse(req)
 }
 

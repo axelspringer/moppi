@@ -161,7 +161,6 @@ func (server *Server) Start() {
 	goji.Post("/universes", server.createUniverse)
 	goji.Handle("/universes/*", universes)
 	universes.Use(middleware.SubRouter)
-	universes.Get("/:universe/meta", server.getUniverse)
 	universes.Delete("/:universe", server.deleteUniverse)
 	universes.Get("/:universe/packages", server.getPkgs)
 	universes.Get("/:universe/packages/:name", server.getPkgRevisions)

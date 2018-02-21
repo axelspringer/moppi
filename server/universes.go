@@ -20,34 +20,19 @@ import (
 	"net/http"
 
 	pb "github.com/axelspringer/moppi/api/v1"
+	"github.com/axelspringer/moppi/cfg"
 	"github.com/axelspringer/moppi/provider"
 	"github.com/zenazn/goji/web"
 )
 
-func NewServer() *Server {
-	return &Server{}
+func NewServer(config *cfg.Config) *Server {
+	return &Server{
+		provider: config.Etcd,
+	}
 }
 
 func (server *Server) GetUniverse(ctx context.Context, req *pb.PackageRequest) (*pb.Universe, error) {
-	return &pb.Universe{
-		Id:          "test",
-		Version:     req.Id,
-		Description: "lala",
-	}, nil
-}
-
-func (server *Server) getUniverse(c web.C, w http.ResponseWriter, _ *http.Request) {
-	var pkgRequest provider.Request
-	pkgRequest.Universe = c.URLParams["universe"]
-
-	universe, err := server.provider.GetUniverse(&pkgRequest)
-	if err != nil {
-		writeErrorJSON(w, "Could not retrieve the universes", 400, err)
-		return
-	}
-
-	writeJSON(w, universe)
-	return
+	return server.provider.GetUniverse(req)
 }
 
 // createUniverse is creating a new universe in the KV

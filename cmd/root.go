@@ -161,9 +161,19 @@ func initConfig() {
 	// init provider
 	config.Init()
 
+	// only log, when verbose is enabled
+	cfg.Log.Info("Configuration initialized")
+}
+
+// run is running a server and is passing along the config
+func run(cmd *cobra.Command, args []string) {
+	var err error // handle error
+
+	fmt.Println(config.Etcd.Prefix)
+
 	listenAddr := "localhost:8080"
 	grpcServer := grpc.NewServer()
-	pb.RegisterUniversesServer(grpcServer, server.NewServer())
+	pb.RegisterUniversesServer(grpcServer, server.NewServer(config))
 	grpcLis, err := net.Listen("tcp", "localhost:")
 	if err != nil {
 		panic(err)
@@ -207,14 +217,6 @@ func initConfig() {
 
 	wg.Add(1)
 	wg.Wait()
-
-	// only log, when verbose is enabled
-	cfg.Log.Info("Configuration initialized")
-}
-
-// run is running a server and is passing along the config
-func run(cmd *cobra.Command, args []string) {
-	var err error // handle error
 
 	// watch relevant syscalls
 	go watchdog()

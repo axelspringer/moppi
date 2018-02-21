@@ -16,6 +16,7 @@ package provider
 
 import (
 	"github.com/axelspringer/go-chronos"
+	pb "github.com/axelspringer/moppi/api/v1"
 	"github.com/docker/libkv/store"
 	"github.com/gambol99/go-marathon"
 )
@@ -25,7 +26,7 @@ type Provider interface {
 	Version() (*store.KVPair, error)
 	Setup() (bool, error)
 	CreateUniverse(u *Universe) error
-	GetUniverse(req *Request) (*Universe, error)
+	GetUniverse(req *pb.PackageRequest) (*pb.Universe, error)
 	GetUniverses() (*Universes, error)
 	GetRevisions(req *Request) (*PackageRevisions, error)
 	GetPackage(req *Request) (*Package, error)

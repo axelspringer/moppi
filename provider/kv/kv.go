@@ -23,6 +23,7 @@ import (
 	"strconv"
 	"strings"
 
+	pb "github.com/axelspringer/moppi/api/v1"
 	"github.com/axelspringer/moppi/provider"
 	"github.com/docker/libkv"
 	"github.com/docker/libkv/store"
@@ -48,6 +49,7 @@ func (p *Provider) Version() (*store.KVPair, error) {
 
 // Setup tries to setup moppi in a new kv
 func (p *Provider) Setup() (bool, error) {
+	fmt.Println(p.kvClient)
 	if ok, _ := p.kvClient.Exists(p.Prefix); !ok {
 
 		// create config
@@ -56,7 +58,7 @@ func (p *Provider) Setup() (bool, error) {
 		// }
 
 		cfg := &provider.Config{
-		// Meta: &meta,
+			// Meta: &meta,
 		}
 
 		// Transcode
@@ -225,9 +227,9 @@ func (p *Provider) GetUniverses() (*provider.Universes, error) {
 }
 
 // GetUniverse return the meta infos of a universe
-func (p *Provider) GetUniverse(req *provider.Request) (*provider.Universe, error) {
-	path := universeMetaPath(p.Prefix, req.Universe)
-	var universe provider.Universe
+func (p *Provider) GetUniverse(req *pb.PackageRequest) (*pb.Universe, error) {
+	path := universeMetaPath(p.Prefix, req.Id)
+	var universe pb.Universe
 
 	if err := kvstructure.Transdecode(&universe, path, p.kvClient); err != nil {
 		return &universe, err
