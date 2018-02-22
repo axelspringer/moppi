@@ -15,8 +15,6 @@
 package cfg
 
 import (
-	"net"
-
 	"github.com/axelspringer/moppi/provider/etcd"
 )
 
@@ -29,5 +27,5 @@ type Config struct {
 	Verbose   bool
 	Zookeeper string
 	Etcd      etcd.Provider
-	Listener  net.Listener
+	Listener  string
 }

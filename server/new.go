@@ -15,36 +15,32 @@
 package server
 
 import (
+	"context"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"sync"
 
-	"github.com/rs/cors"
-	"github.com/zenazn/goji/web/middleware"
+	pb "github.com/axelspringer/moppi/api/v1"
+	"google.golang.org/grpc"
 	validator "gopkg.in/go-playground/validator.v9"
 
 	"github.com/axelspringer/moppi/cfg"
 	"github.com/axelspringer/moppi/installer"
 	"github.com/axelspringer/moppi/queue"
-	"github.com/axelspringer/moppi/version"
-	"github.com/zenazn/goji"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/zenazn/goji/web"
 )
 
-// New returns a new instance of a Server
+// New returns a new instance of the server
 func New(config *cfg.Config, exit chan bool, wg *sync.WaitGroup) (*Server, error) {
-	return mustNew(config, exit, wg)
-}
-
-// mustNew wraps the creation of a new Server
-func mustNew(config *cfg.Config, exit chan bool, wg *sync.WaitGroup) (*Server, error) {
 	var validate *validator.Validate
 
 	// check version of repo in provider
-	if ok, err := config.Etcd.CheckVersion(version.Version); !ok {
-		return nil, err
-	}
+	// if ok, err := config.Etcd.CheckVersion(version.Version); !ok {
+	// 	return nil, err
+	// }
 
 	installer, err := installer.New(config)
 	if err != nil {
@@ -58,7 +54,7 @@ func mustNew(config *cfg.Config, exit chan bool, wg *sync.WaitGroup) (*Server, e
 
 	// server config
 	server := &Server{
-		listener:  config.Listener,
+		listen:    config.Listen,
 		installer: installer,
 		signals:   signals,
 		provider:  config.Etcd,
@@ -136,41 +132,48 @@ func (server *Server) version(w http.ResponseWriter, req *http.Request) {
 }
 
 // Start is starting to serve the api
-func (server *Server) Start() {
+func (server *Server) Start(grpcAddr string) {
+	var err error
+
 	defer server.wg.Done()
 
 	// add to waiting group
 	server.wg.Add(1)
 
-	// cors, allow allow for now
-	c := cors.AllowAll()
-	goji.Use(c.Handler)
+	// connect gateway to gRPC server
+	mux := http.NewServeMux()
+	// Start the REST gateway service, connecting to the gRPC server
+	gwmux := runtime.NewServeMux()
+	ctx := context.Background()
+	dopts := []grpc.DialOption{grpc.WithInsecure()}
+	err = pb.RegisterUniversesHandlerFromEndpoint(ctx, gwmux, grpcAddr, dopts)
+	if err != nil {
+		server.Stop()
 
-	// status
-	goji.Get("/ping", server.ping)
-	goji.Get("/health", server.health)
-	goji.Get("/version", server.version)
+		return
+	}
+	mux.Handle("/", gwmux)
 
-	// triggers
-	goji.Post("/install", server.installPackage)
-	goji.Post("/uninstall", server.uninstallPackage)
+	// register server listener
+	httpLis, err := net.Listen("tcp", server.listen)
+	if err != nil {
+		panic(err)
+	}
 
-	// sub router universes
-	universes := web.New()
-	goji.Get("/universes", server.getUniverses)
-	goji.Post("/universes", server.createUniverse)
-	goji.Handle("/universes/*", universes)
-	universes.Use(middleware.SubRouter)
-	universes.Delete("/:universe", server.deleteUniverse)
-	universes.Get("/:universe/packages", server.getPkgs)
-	universes.Get("/:universe/packages/:name", server.getPkgRevisions)
-	universes.Delete("/:universe/packages/:name", server.deletePkg)
-	universes.Get("/:universe/packages/:name/:revision", server.getPkg)
-	universes.Post("/:universe/packages/:name", server.createPkgRevision)
-	universes.Delete("/:universe/packages/:name/:revision", server.deletePkgRevision)
+	srv := &http.Server{
+		Addr:    server.listen,
+		Handler: mux,
+	}
 
-	// create server
-	goji.ServeListener(server.listener)
+	go func() {
+		cfg.Log.Infof("Starting http server on %s\n", server.listen)
+		err = srv.Serve(httpLis)
+		if err != nil {
+			server.Stop()
+
+			return
+		}
+	}()
 
 	// wait for exit
 	<-server.exit
@@ -178,5 +181,7 @@ func (server *Server) Start() {
 
 // Stop is stoping to serve the api
 func (server *Server) Stop() {
-	os.Exit(0)
+	server.exit <- true
+
+	return // noop
 }

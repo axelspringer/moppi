@@ -15,10 +15,8 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"net"
-	"net/http"
 	"os"
 	"path/filepath"
 	"sync"
@@ -26,7 +24,6 @@ import (
 	pb "github.com/axelspringer/moppi/api/v1"
 	"github.com/axelspringer/moppi/cfg"
 	"github.com/axelspringer/moppi/server"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/pflag"
 	"google.golang.org/grpc"
 
@@ -161,6 +158,8 @@ func initConfig() {
 	// init provider
 	config.Init()
 
+	config.Listen = "localhost:8080"
+
 	// only log, when verbose is enabled
 	cfg.Log.Info("Configuration initialized")
 }
@@ -169,11 +168,13 @@ func initConfig() {
 func run(cmd *cobra.Command, args []string) {
 	var err error // handle error
 
-	fmt.Println(config.Etcd.Prefix)
+	srv, err := server.New(config, exit, &wg)
+	if err != nil {
+		cfg.Log.Fatalf("Could not create server: %v", err)
+	}
 
-	listenAddr := "localhost:8080"
 	grpcServer := grpc.NewServer()
-	pb.RegisterUniversesServer(grpcServer, server.NewServer(config))
+	pb.RegisterUniversesServer(grpcServer, srv)
 	grpcLis, err := net.Listen("tcp", "localhost:")
 	if err != nil {
 		panic(err)
@@ -187,49 +188,11 @@ func run(cmd *cobra.Command, args []string) {
 		}
 	}()
 
-	mux := http.NewServeMux()
-	// Start the REST gateway service, connecting to the gRPC server
-	gwmux := runtime.NewServeMux()
-	ctx := context.Background()
-	dopts := []grpc.DialOption{grpc.WithInsecure()}
-	err = pb.RegisterUniversesHandlerFromEndpoint(ctx, gwmux, grpcLis.Addr().String(), dopts)
-	if err != nil {
-		fmt.Printf("serve: %v\n", err)
-		return
-	}
-	mux.Handle("/", gwmux)
-
-	httpLis, err := net.Listen("tcp", listenAddr)
-	if err != nil {
-		panic(err)
-	}
-
-	srv := &http.Server{
-		Addr:    listenAddr,
-		Handler: mux,
-	}
-
-	fmt.Printf("Starting http server on %s\n", listenAddr)
-	err = srv.Serve(httpLis)
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
-	}
-
-	wg.Add(1)
-	wg.Wait()
-
 	// watch relevant syscalls
 	go watchdog()
 
-	// create server
-	server, err := server.New(config, exit, &wg)
-	if err != nil {
-		cfg.Log.Errorf("Failed to create server: %v", err)
-		waitGracefulShutdown()
-	}
-
 	// start server
-	go server.Start()
+	go srv.Start(grpcLis.Addr().String())
 
 	// wait for graceful shutdown
 	<-shutdown

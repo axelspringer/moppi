@@ -15,7 +15,6 @@
 package server
 
 import (
-	"net"
 	"os"
 	"sync"
 
@@ -30,7 +29,7 @@ import (
 type Server struct {
 	signals   chan os.Signal
 	installer *installer.Installer
-	listener  net.Listener
+	listen    string
 	provider  etcd.Provider
 	queue     queue.WorkQueue
 	exit      chan bool

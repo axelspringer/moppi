@@ -49,7 +49,6 @@ func (p *Provider) Version() (*store.KVPair, error) {
 
 // Setup tries to setup moppi in a new kv
 func (p *Provider) Setup() (bool, error) {
-	fmt.Println(p.kvClient)
 	if ok, _ := p.kvClient.Exists(p.Prefix); !ok {
 
 		// create config
